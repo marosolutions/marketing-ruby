@@ -11,7 +11,7 @@ RSpec.describe MaropostApi::Campaigns do
   it "gets an individual campaign" do
     campaign_id = 2
     campaign = MaropostApi::Campaigns.new(1000)
-    result = campaign.getCampaign(campaign_id)
+    result = campaign.get_campaign(campaign_id)
     
     expect(result).not_to be_empty
     expect(result).to respond_to(:each)
