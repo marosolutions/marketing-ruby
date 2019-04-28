@@ -61,7 +61,6 @@ RSpec.describe MaropostApi::Campaigns do
       
       contact_ids = click_reports.collect{|r| r["contact_id"]}
       # test for uniqueness
-      p contact_ids, contact_ids.uniq
       expect(contact_ids.uniq.length == contact_ids.length).to eq true
     end
     
