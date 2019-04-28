@@ -8,16 +8,15 @@ module MaropostApi
   base_uri 'https://api.maropost.com'
   
   attr_accessor :api_key
+  attr_accessor :account
   
   class Error < StandardError; end
   
   def self.get_result(path, options)
-    begin
-      result = get(path, options)
-      result.parsed_response if result.code == 200
-    rescue
-      raise 404
-    end
+    full_path = path << ".#{format.to_s}"
+    # p "getting path: " << full_path, options
+    result = get(path, options)
+    result.parsed_response
   end
   
   def self.set_query_params(query_params = {})
