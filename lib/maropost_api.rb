@@ -34,12 +34,20 @@ module MaropostApi
     result.parsed_response
   end
   
-  def self.put_result(path, form_body)
+  def self.put_result(path, form_body = {}, query_params = {})
     raise ArgumentError "path and form_body cannot be nil" if path.nil? || form_body.nil?
     full_path = path << ".#{format.to_s}"
     full_path = full_path << "?auth_token=#{@api_key}"
-    # pp "putting to path: " << full_path
-    result = put(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'})
+
+    result = put(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'}, :query => query_params[:query])
+    
+    result.parsed_response
+  end
+  
+  def self.delete_result(path, query_params)
+    raise ArgumentError "path and query_params cannot be nil" if path.nil? || query_params.nil?
+    full_path = path << ".#{format.to_s}"
+    result = delete(full_path, :headers => {"Content-Type" => 'application/json'}, :query => query_params[:query])
     
     result.parsed_response
   end

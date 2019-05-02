@@ -105,7 +105,44 @@ module MaropostApi
       
     end
     
-    def updated_for_list_and_contact(
+    def create_or_update_for_lists_and_workflows( 
+        email,
+        first_name,
+        last_name,
+        phone,
+        fax,
+        uid = nil,
+        custom_field = {},
+        add_tags = [],
+        remove_tags = [],
+        remove_from_dnm = true,
+        **options
+      )
+      args = method(__method__).parameters
+      body = {contact: {}}
+      args.each do |arg|
+        k = arg[1].to_s
+        v = eval(k)
+        body[:contact][k] = v unless v.nil?
+      end
+      
+      email_existence = get_for_email email
+      if email_existence.has_key? "email"
+        contact_id = email_existence["id"]
+        full_path = full_resource_path("/#{contact_id}")
+        body[:contact].delete("options")
+        body[:contact]["subscribe"] = options[:subscribe] if options.has_key? :subscribe
+        
+        MaropostApi.put_result(full_path, body)
+      else
+        full_path = full_resource_path
+
+        MaropostApi.post_result(full_path, body)
+      end
+      
+    end
+    
+    def update_for_list_and_contact(
         list_id,
         contact_id,
         email,
@@ -134,6 +171,41 @@ module MaropostApi
       MaropostApi.put_result(full_path, body)
     end
     
+    def unsubscribe_all(contact_field_value, contact_field_name)
+      full_path = full_resource_path('/unsubscribe_all')
+      query_params = MaropostApi.set_query_params({"contact[#{contact_field_name}]" => contact_field_value})
+      
+      MaropostApi.put_result(full_path, {}, query_params)
+    end
+    
+    def delete_from_all_lists(email)
+      full_path = full_resource_path('/delete_all')
+      query_params = MaropostApi.set_query_params({"contact[email]" => email})
+      
+      MaropostApi.delete_result(full_path, query_params)
+    end
+    
+    def delete_from_lists(contact_id, lists_to_delete_from)
+      full_path = full_resource_path("/#{contact_id}")
+      query_params = MaropostApi.set_query_params({'list_ids' => lists_to_delete_from.join(',')})
+      
+      MaropostApi.delete_result(full_path, query_params)
+    end
+    
+    def delete_contact_for_uid(uid)
+      full_path = full_resource_path("/delete_all")
+      query_params = MaropostApi.set_query_params({"uid" => uid})
+      
+      MaropostApi.delete_result(full_path, query_params)
+    end
+    
+    def delete_list_contact(list_id, contact_id)
+      full_path = full_resource_path("/#{list_id}/contacts/#{contact_id}", "lists")
+      query_params = MaropostApi.set_query_params
+      
+      MaropostApi.delete_result(full_path, query_params)
+    end
+      
       private
       
       def full_resource_path(specifics = '', root_resource = 'contacts')

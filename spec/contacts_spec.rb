@@ -92,7 +92,6 @@ RSpec.describe MaropostApi::Contacts do
     it "creates for a list when no existing contact found" do
       contact = MaropostApi::Contacts.new(@test_data[:account_id])
       new_email = (0..10).map{('a'..'z').to_a[rand(26)]}.join << Time.now.to_i.to_s << "@rspectest.com"
-      email_existence = contact.get_for_email(new_email)
       list_id = @test_list_ids[rand(0..4)]
       # p new_email, email_existence, list_id
 
@@ -124,7 +123,6 @@ RSpec.describe MaropostApi::Contacts do
       expect(new_contact["first_name"]).to eq @test_data[:first_name]
       expect(new_contact["last_name"]).to eq @test_data[:last_name]
       expect(new_contact["subscribed"]).to eq true
-      expect(new_contact["address_type"]).to include "new add"
 
       create_time = Time.parse(new_contact["created_at"]).to_i
       update_time = Time.parse(new_contact["updated_at"]).to_i
@@ -132,6 +130,51 @@ RSpec.describe MaropostApi::Contacts do
       # created_time and updated_time should be equal for new contact
       expect(create_time).to eq update_time
       
+    end
+    
+    it "creates contact for lists and workflows" do
+      contact = MaropostApi::Contacts.new(@test_data[:account_id])
+      new_email = (0..10).map{('a'..'z').to_a[rand(26)]}.join << Time.now.to_i.to_s << "@rspectest.com"
+      email_existence = contact.get_for_email(new_email)
+      subscribe_list_ids = @test_list_ids.join(',')
+      unsubscribe_list_ids = @test_list_ids.last(2).join(',')
+      unsubscribe_workflow_ids = "3443,43434"
+      unsubscribe_campaign = "1123,4321"
+      
+      new_contact = contact.create_or_update_for_lists_and_workflows(
+        new_email,
+        @test_data[:first_name],
+        @test_data[:last_name],
+        @test_data[:phone],
+        @test_data[:fax],
+        nil,
+        @test_data[:custom_field],
+        @test_data[:add_tags],
+        @test_data[:remove_tags],
+        @test_data[:remove_from_dnm],
+        :subscribe_list_ids => subscribe_list_ids,
+        :unsubscribe_list_ids => unsubscribe_list_ids,
+        :unsubscribe_workflow_ids => unsubscribe_workflow_ids,
+        :unsubscribe_campaign => unsubscribe_campaign
+      )
+      
+      expect(new_contact).to be_kind_of Hash
+      expect(new_contact).to have_key "email"
+      expect(new_contact).to have_key "account_id"
+      expect(new_contact).to have_key "first_name"
+      expect(new_contact).to have_key "last_name"
+      expect(new_contact).to have_key "created_at"
+      expect(new_contact).to have_key "updated_at"
+      expect(new_contact["email"]).to eq new_email
+      expect(new_contact["account_id"]).to eq @test_data[:account_id]
+      expect(new_contact["first_name"]).to eq @test_data[:first_name]
+      expect(new_contact["last_name"]).to eq @test_data[:last_name]
+      
+      create_time = Time.parse(new_contact["created_at"]).to_i
+      update_time = Time.parse(new_contact["updated_at"]).to_i
+      
+      # created_time and updated_time should be equal for new contact
+      expect(create_time).to eq update_time
     end
   end
   
@@ -198,7 +241,7 @@ RSpec.describe MaropostApi::Contacts do
       fax = 1234567890
       email = "updated_" << contact_to_update["email"]
       
-      updated_contact = contact.updated_for_list_and_contact(
+      updated_contact = contact.update_for_list_and_contact(
         list_id,
         contact_to_update["id"],
         email,
@@ -235,6 +278,107 @@ RSpec.describe MaropostApi::Contacts do
       
       # created_time should be less than updated_time for updated contact
       expect(create_time < update_time).to eq true
+    end
+    
+    it "updates contact for lists and workflows" do
+      contact = MaropostApi::Contacts.new(@test_data[:account_id])
+      existing_contact_id, existing_email = nil
+      @test_emails.each do |email|
+        email_returned = contact.get_for_email(email)
+        if email_returned.has_key? "email"
+          existing_contact_id = email_returned["id"]
+          existing_email = email
+          break unless existing_contact_id.nil?
+        end
+      end
+      
+      list_id = @test_list_ids[rand(0..4)]
+      contacts_for_list = contact.get_for_list(list_id, 1)
+      contact_to_update = contacts_for_list.first
+      subscribe_list_ids = @test_list_ids.join(',')
+      unsubscribe_list_ids = @test_list_ids.last(2).join(',')
+      unsubscribe_workflow_ids = "3443,43434"
+      unsubscribe_campaign = "1123,4321"
+      existing_email = "updated_" << existing_email
+      first_name = @test_data[:last_name] << "_updated"
+      last_name = @test_data[:last_name] << "_updated"
+      phone = @test_data[:phone] << "_updated"
+      fax = @test_data[:fax] << "_updated"
+      updated_contact = contact.create_or_update_for_lists_and_workflows(
+        existing_email,
+        first_name,
+        last_name,
+        phone,
+        fax,
+        nil,
+        @test_data[:custom_field],
+        @test_data[:add_tags],
+        @test_data[:remove_tags],
+        @test_data[:remove_from_dnm],
+        :subscribe => true
+      )
+
+      expect(updated_contact).to be_kind_of Hash
+      expect(updated_contact).to have_key "email"
+      expect(updated_contact).to have_key "account_id"
+      expect(updated_contact).to have_key "first_name"
+      expect(updated_contact).to have_key "last_name"
+      expect(updated_contact).to have_key "phone"
+      expect(updated_contact).to have_key "fax"
+      expect(updated_contact).to have_key "created_at"
+      expect(updated_contact).to have_key "updated_at"
+      expect(updated_contact["email"]).to eq existing_email
+      expect(updated_contact["account_id"]).to eq @test_data[:account_id]
+      expect(updated_contact["first_name"]).to eq first_name
+      expect(updated_contact["last_name"]).to eq last_name
+      expect(updated_contact["phone"]).to eq phone
+      expect(updated_contact["fax"]).to eq fax
+
+      create_time = Time.parse(updated_contact["created_at"]).to_i
+      update_time = Time.parse(updated_contact["updated_at"]).to_i
+      
+      # created_time and updated_time should be different for updated contact
+      expect(create_time < update_time).to eq true
+    end
+    
+    it "unsubscribes contact having email|uid as specified by value parameter" do
+      contact = MaropostApi::Contacts.new(@test_data[:account_id])
+      new_email = (0..10).map{('a'..'z').to_a[rand(26)]}.join << Time.now.to_i.to_s << "@rspectest.com"
+      list_ids = @test_list_ids
+      
+      # creates a contact because the email is new
+      new_contact = contact.create_or_update_for_lists_and_workflows(
+        new_email,
+        @test_data[:first_name],
+        @test_data[:last_name],
+        @test_data[:phone],
+        @test_data[:fax],
+        nil,
+        @test_data[:custom_field],
+        @test_data[:add_tags],
+        @test_data[:remove_tags],
+        true,
+        :subscribe_list_ids => list_ids.join(',')
+      )
+      
+      expect(new_contact).not_to be_empty
+      
+      new_contact = contact.get_for_email(new_email)
+      subscribed_count = new_contact["list_subscriptions"].select{|l| l["status"] == 'Subscribed'}.count
+      
+      expect(new_contact).not_to be_empty
+      expect(new_contact).to have_key "list_subscriptions"
+      expect(new_contact["list_subscriptions"]).not_to be_empty
+      expect(subscribed_count).to eq list_ids.count
+      
+      unsubscribe = contact.unsubscribe_all(new_email, 'email')
+      contact_after_unsubscription = contact.get_for_email(new_email)
+      unsubscribed_count = contact_after_unsubscription["list_subscriptions"].select{|l| l["status"] == 'Unsubscribed'}.count
+      
+      expect(contact_after_unsubscription).not_to be_empty
+      expect(contact_after_unsubscription).to have_key "list_subscriptions"
+      expect(unsubscribed_count).to eq list_ids.count
+      
     end
   end
 
@@ -350,6 +494,85 @@ RSpec.describe MaropostApi::Contacts do
       
     end
     
+  end
+  
+  describe "---- DELETE Endponts ----" do
+    it "deletes contact from all the lists" do
+      contact = MaropostApi::Contacts.new(@test_data[:account_id])
+      
+      email = @test_emails[rand(4)]
+      
+      deleted_result = contact.delete_from_all_lists(email)
+      
+      expect(deleted_result).to eq nil
+    end
+    
+    it "deletes contact from specified lists" do
+      contact = MaropostApi::Contacts.new(@test_data[:account_id])
+      @test_emails.each do |email|
+        contact_for_email = contact.get_for_email(email)
+        # pp contact_for_email
+        next if contact_for_email.has_key? "message" and contact_for_email["message"] != nil and contact_for_email["message"].include? "Contact is not present"
+        
+        list_subscription_ids = contact_for_email['list_subscriptions'].collect{|list| list["list_id"] }
+        next if list_subscription_ids.empty?
+        
+        contact_id = contact_for_email["id"]
+        total_list_ids = list_subscription_ids.count
+        lists_to_delete_from = list_subscription_ids.last(1)
+      
+        delete_result = contact.delete_from_lists(contact_id, lists_to_delete_from)
+      
+        expect(delete_result.nil?).to eq true
+
+        contact_after_deleting = contact.get_for_email(contact_for_email["email"])
+        existing_list_ids = contact_after_deleting['list_subscriptions'].collect{|list| list["list_id"] }
+        # verify if new_existing_list_ids are less than the olde ones - to prove deletion success
+        expect(list_subscription_ids.count > existing_list_ids.count).to eq true
+        lists_to_delete_from.each do |deleted_list_id|
+          expect(existing_list_ids).not_to include deleted_list_id
+        end
+        break unless list_subscription_ids.empty?
+      end
+    end
+    
+    it "deletes a list contact" do
+      contact = MaropostApi::Contacts.new(@test_data[:account_id])
+      new_email = (0..10).map{('a'..'z').to_a[rand(26)]}.join << Time.now.to_i.to_s << "@rspectest.com"
+      list_ids = @test_list_ids[0..3]
+      
+      # creates a contact because the email is new
+      new_contact = contact.create_or_update_for_lists_and_workflows(
+        new_email,
+        @test_data[:first_name],
+        @test_data[:last_name],
+        @test_data[:phone],
+        @test_data[:fax],
+        nil,
+        @test_data[:custom_field],
+        @test_data[:add_tags],
+        @test_data[:remove_tags],
+        true,
+        :subscribe_list_ids => list_ids.join(',')
+      )
+      
+      expect(new_contact).not_to be_empty
+      
+      list_contact_before_delete = contact.get_for_email(new_email)
+      contact_id = list_contact_before_delete["id"]
+
+      delete_contact = contact.delete_list_contact(list_ids[0], contact_id)
+      list_contact_after_delete = contact.get_for_email(new_email)
+      
+      list_subscriptions_before_delete = list_contact_before_delete["list_subscriptions"].collect{|l| l["list_id"]}
+      list_subscriptions_after_delete = list_contact_after_delete["list_subscriptions"].collect{|l| l["list_id"]}
+            
+      expect(delete_contact.nil?).to eq true
+      expect(list_contact_before_delete).to be_kind_of Hash
+      expect(list_subscriptions_after_delete.count < list_subscriptions_before_delete.count).to eq true
+      expect(list_subscriptions_before_delete).to include list_ids[0]
+      expect(list_subscriptions_after_delete).not_to include list_ids[0]
+    end    
   end
   
 end
