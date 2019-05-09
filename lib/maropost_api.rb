@@ -2,6 +2,7 @@ require "maropost_api/version"
 require 'uri'
 require "maropost_api/campaigns"
 require "maropost_api/contacts"
+require "maropost_api/journeys"
 require "httparty"
 
 module MaropostApi
@@ -37,8 +38,8 @@ module MaropostApi
   def self.put_result(path, form_body = {}, query_params = {})
     raise ArgumentError "path and form_body cannot be nil" if path.nil? || form_body.nil?
     full_path = path << ".#{format.to_s}"
-    full_path = full_path << "?auth_token=#{@api_key}"
-
+    
+    # p full_path, '=====', query_params
     result = put(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'}, :query => query_params[:query])
     
     result.parsed_response
