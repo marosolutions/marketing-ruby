@@ -91,9 +91,9 @@ module MaropostApi
         body[:contact][k] = v unless v.nil?
       end
       
-      email_existence = get_for_email email
-      if email_existence.has_key? "email"
-        contact_id = email_existence["id"]
+      email_existence = get_for_email(email)
+      if email_existence.success
+        contact_id = email_existence.data["id"]
         full_path = full_resource_path("/#{list_id}/contacts/#{contact_id}", "lists")
         
         MaropostApi.put_result(full_path, body)
@@ -127,8 +127,8 @@ module MaropostApi
       end
       
       email_existence = get_for_email email
-      if email_existence.has_key? "email"
-        contact_id = email_existence["id"]
+      if email_existence.success
+        contact_id = email_existence.data["id"]
         full_path = full_resource_path("/#{contact_id}")
         body[:contact].delete("options")
         body[:contact]["subscribe"] = options[:subscribe] if options.has_key? :subscribe

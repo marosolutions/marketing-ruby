@@ -49,6 +49,9 @@ RSpec.describe MaropostApi::Contacts do
         @test_data[:fax]
       )
 
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
+      
       expect(new_contact).to be_kind_of Hash
       expect(new_contact).to have_key "id"
       expect(new_contact).to have_key "account_id"
@@ -72,6 +75,9 @@ RSpec.describe MaropostApi::Contacts do
         @test_data[:remove_from_dnm],
         @test_data[:options]
       )
+      
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
       
       expect(new_contact).to be_kind_of Hash
       expect(new_contact).to have_key "id"
@@ -109,6 +115,10 @@ RSpec.describe MaropostApi::Contacts do
         true,
         true
       )
+      
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
+      
       expect(new_contact).to be_kind_of Hash
       expect(new_contact).to have_key "email"
       expect(new_contact).to have_key "account_id"
@@ -158,6 +168,9 @@ RSpec.describe MaropostApi::Contacts do
         :unsubscribe_campaign => unsubscribe_campaign
       )
       
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
+      
       expect(new_contact).to be_kind_of Hash
       expect(new_contact).to have_key "email"
       expect(new_contact).to have_key "account_id"
@@ -184,6 +197,10 @@ RSpec.describe MaropostApi::Contacts do
       existing_contact_id, existing_email = nil
       @test_emails.each do |email|
         email_returned = contact.get_for_email(email)
+        
+        expect(email_returned).to be_kind_of OperationResult
+        email_returned = email_returned.data
+        
         if email_returned.has_key? "email"
           existing_contact_id = email_returned["id"]
           existing_email = email
@@ -207,6 +224,10 @@ RSpec.describe MaropostApi::Contacts do
         true,
         true
       )
+      
+      expect(updated_contact).to be_kind_of OperationResult
+      updated_contact = updated_contact.data
+      
       expect(updated_contact).to be_kind_of Hash
       expect(updated_contact).to have_key "email"
       expect(updated_contact).to have_key "account_id"
@@ -233,6 +254,10 @@ RSpec.describe MaropostApi::Contacts do
       existing_contact_id, existing_email = nil
       list_id = @test_list_ids[rand(0..4)]
       contacts_for_list = contact.get_for_list(list_id, 1)
+      
+      expect(contacts_for_list).to be_kind_of OperationResult
+      contacts_for_list = contacts_for_list.data
+      
       contact_to_update = contacts_for_list.first
 
       first_name = contact_to_update["first_name"] << " updated"
@@ -256,6 +281,9 @@ RSpec.describe MaropostApi::Contacts do
         true,
         true
       )
+      
+      expect(updated_contact).to be_kind_of OperationResult
+      updated_contact = updated_contact.data
       
       expect(updated_contact).to be_kind_of Hash
       expect(updated_contact).to have_key "email"
@@ -285,6 +313,10 @@ RSpec.describe MaropostApi::Contacts do
       existing_contact_id, existing_email = nil
       @test_emails.each do |email|
         email_returned = contact.get_for_email(email)
+        
+        expect(email_returned).to be_kind_of OperationResult
+        email_returned = email_returned.data
+        
         if email_returned.has_key? "email"
           existing_contact_id = email_returned["id"]
           existing_email = email
@@ -294,6 +326,10 @@ RSpec.describe MaropostApi::Contacts do
       
       list_id = @test_list_ids[rand(0..4)]
       contacts_for_list = contact.get_for_list(list_id, 1)
+      
+      expect(contacts_for_list).to be_kind_of OperationResult
+      contacts_for_list = contacts_for_list.data
+      
       contact_to_update = contacts_for_list.first
       subscribe_list_ids = @test_list_ids.join(',')
       unsubscribe_list_ids = @test_list_ids.last(2).join(',')
@@ -317,6 +353,9 @@ RSpec.describe MaropostApi::Contacts do
         @test_data[:remove_from_dnm],
         :subscribe => true
       )
+
+      expect(updated_contact).to be_kind_of OperationResult
+      updated_contact = updated_contact.data
 
       expect(updated_contact).to be_kind_of Hash
       expect(updated_contact).to have_key "email"
@@ -361,9 +400,15 @@ RSpec.describe MaropostApi::Contacts do
         :subscribe_list_ids => list_ids.join(',')
       )
       
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
+      
       expect(new_contact).not_to be_empty
       
       new_contact = contact.get_for_email(new_email)
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
+      
       subscribed_count = new_contact["list_subscriptions"].select{|l| l["status"] == 'Subscribed'}.count
       
       expect(new_contact).not_to be_empty
@@ -372,7 +417,13 @@ RSpec.describe MaropostApi::Contacts do
       expect(subscribed_count).to eq list_ids.count
       
       unsubscribe = contact.unsubscribe_all(new_email, 'email')
+      expect(unsubscribe).to be_kind_of OperationResult
+      unsubscribe = unsubscribe.data
+      
       contact_after_unsubscription = contact.get_for_email(new_email)
+      expect(contact_after_unsubscription).to be_kind_of OperationResult
+      contact_after_unsubscription = contact_after_unsubscription.data
+      
       unsubscribed_count = contact_after_unsubscription["list_subscriptions"].select{|l| l["status"] == 'Unsubscribed'}.count
       
       expect(contact_after_unsubscription).not_to be_empty
@@ -387,15 +438,20 @@ RSpec.describe MaropostApi::Contacts do
       email = nil # first test with no email provided
       contact = MaropostApi::Contacts.new(@test_data[:account_id])
       contacts_for_email = contact.get_for_email(email)
-
-      expect(contacts_for_email).to be_kind_of Hash
-      expect(contacts_for_email).to have_key "message"
-      expect(contacts_for_email["message"]).to include "Contact is not present"
+      
+      expect(contacts_for_email).to be_kind_of OperationResult
+      expect(contacts_for_email.success).to eq false
+      expect(contacts_for_email.errors).not_to be_empty
+      expect(contacts_for_email.errors).to have_key "message"
+      expect(contacts_for_email.errors["message"]).to include "Contact is not present"
     end
     
     it "gets contact for provided email" do
       contact = MaropostApi::Contacts.new(@test_data[:account_id])
       contacts_for_email = contact.get_for_email(@test_data[:email])
+      
+      expect(contacts_for_email).to be_kind_of OperationResult
+      contacts_for_email = contacts_for_email.data
       
       expect(contacts_for_email).to be_kind_of Hash
       expect(contacts_for_email).not_to be_empty
@@ -407,9 +463,17 @@ RSpec.describe MaropostApi::Contacts do
       contact = MaropostApi::Contacts.new(@test_data[:account_id])
       @test_emails.each do |email|
         contact_for_email = contact.get_for_email email
+        
+        expect(contact_for_email).to be_kind_of OperationResult
+        next unless contact_for_email.success
+        contact_for_email = contact_for_email.data        
         contact_id = contact_for_email["id"]
         
         opens_for_contact = contact.get_opens(contact_id, 1)
+        expect(opens_for_contact).to be_kind_of OperationResult
+        
+        next unless opens_for_contact.success
+        opens_for_contact = opens_for_contact.data
         
         unless opens_for_contact.empty? or opens_for_contact.kind_of? Hash
           expect(opens_for_contact.first["campaign_id"]).not_to be_nil
@@ -430,9 +494,17 @@ RSpec.describe MaropostApi::Contacts do
       contact = MaropostApi::Contacts.new(@test_data[:account_id])
       @test_emails.each do |email|
         contact_for_email = contact.get_for_email email
+        
+        expect(contact_for_email).to be_kind_of OperationResult
+        next unless contact_for_email.success
+        
+        contact_for_email = contact_for_email.data
         contact_id = contact_for_email["id"]
         
         clicks_for_contact = contact.get_clicks(contact_id, 1)
+        expect(clicks_for_contact).to be_kind_of OperationResult
+        next unless clicks_for_contact.success
+        clicks_for_contact = clicks_for_contact.data
         
         unless clicks_for_contact.empty? or clicks_for_contact.kind_of? Hash
           expect(clicks_for_contact.first["contact_id"]).to eq contact_id
@@ -455,15 +527,16 @@ RSpec.describe MaropostApi::Contacts do
       @test_list_ids.each do |list_id|
         contacts_in_list = contact.get_for_list(list_id, 1)
         
-        unless contacts_in_list.empty? or contacts_in_list.kind_of? Hash
-          expect(contacts_in_list).to be_kind_of Array
-          expect(contacts_in_list.first["account_id"]).to eq @test_data[:account_id]
-          expect(contacts_in_list.first["email"]).not_to be_empty
-          expect(contacts_in_list.first["id"]).to respond_to :next
-        end
-        
-        unless contacts_in_list.kind_of? Array
-          p contacts_in_list
+        expect(contacts_in_list).to be_kind_of OperationResult
+                
+        if contacts_in_list.success
+          expect(contacts_in_list.data).to be_kind_of Array
+          expect(contacts_in_list.data.first["account_id"]).to eq @test_data[:account_id]
+          expect(contacts_in_list.data.first["email"]).not_to be_empty
+          expect(contacts_in_list.data.first["id"]).to respond_to :next
+        else
+          expect(contacts_in_list.errors).not_to be_empty
+          expect(contacts_in_list.errors).to have_key "message"
         end
       end
     end
@@ -473,11 +546,23 @@ RSpec.describe MaropostApi::Contacts do
       @test_list_ids.each do |list_id|
         contacts_in_list = contact.get_for_list(list_id, 1)
         
+        expect(contacts_in_list).to be_kind_of OperationResult
+        next unless contacts_in_list.success
+        contacts_in_list = contacts_in_list.data
+        
         unless contacts_in_list.empty? or contacts_in_list.kind_of? Hash
           contacts_in_list.each do |contac|
             contact_email = contac["email"]
-            contact_id = contact.get_for_email(contact_email)["id"]
+            contact_for_id = contact.get_for_email(contact_email)
+            
+            expect(contact_for_id).to be_kind_of OperationResult
+            contact_id = contact_for_id.data["id"]
+            
             contact_from_list = contact.get_contact_for_list(list_id, contact_id)
+            
+            expect(contact_from_list).to be_kind_of OperationResult
+            contact_from_list = contact_from_list.data
+            
             expect(contact_from_list).to be_kind_of Hash
             expect(contact_from_list).to have_key "email"
             expect(contact_from_list["email"]).to eq contact_email
@@ -504,6 +589,9 @@ RSpec.describe MaropostApi::Contacts do
       
       deleted_result = contact.delete_from_all_lists(email)
       
+      expect(deleted_result).to be_kind_of OperationResult
+      deleted_result = deleted_result.data
+            
       expect(deleted_result).to eq nil
     end
     
@@ -511,6 +599,9 @@ RSpec.describe MaropostApi::Contacts do
       contact = MaropostApi::Contacts.new(@test_data[:account_id])
       @test_emails.each do |email|
         contact_for_email = contact.get_for_email(email)
+        
+        expect(contact_for_email).to be_kind_of OperationResult
+        contact_for_email = contact_for_email.data
         # pp contact_for_email
         next if contact_for_email.has_key? "message" and contact_for_email["message"] != nil and contact_for_email["message"].include? "Contact is not present"
         
@@ -522,10 +613,17 @@ RSpec.describe MaropostApi::Contacts do
         lists_to_delete_from = list_subscription_ids.last(1)
       
         delete_result = contact.delete_from_lists(contact_id, lists_to_delete_from)
+        
+        expect(delete_result).to be_kind_of OperationResult
+        delete_result = delete_result.data
       
         expect(delete_result.nil?).to eq true
 
         contact_after_deleting = contact.get_for_email(contact_for_email["email"])
+        
+        expect(contact_after_deleting).to be_kind_of OperationResult
+        contact_after_deleting = contact_after_deleting.data
+        
         existing_list_ids = contact_after_deleting['list_subscriptions'].collect{|list| list["list_id"] }
         # verify if new_existing_list_ids are less than the olde ones - to prove deletion success
         expect(list_subscription_ids.count > existing_list_ids.count).to eq true
@@ -556,13 +654,26 @@ RSpec.describe MaropostApi::Contacts do
         :subscribe_list_ids => list_ids.join(',')
       )
       
+      expect(new_contact).to be_kind_of OperationResult
+      new_contact = new_contact.data
+      
       expect(new_contact).not_to be_empty
       
       list_contact_before_delete = contact.get_for_email(new_email)
+      
+      expect(list_contact_before_delete).to be_kind_of OperationResult
+      list_contact_before_delete = list_contact_before_delete.data
       contact_id = list_contact_before_delete["id"]
 
       delete_contact = contact.delete_list_contact(list_ids[0], contact_id)
+      
+      expect(delete_contact).to be_kind_of OperationResult
+      delete_contact = delete_contact.data
+      
       list_contact_after_delete = contact.get_for_email(new_email)
+      
+      expect(list_contact_after_delete).to be_kind_of OperationResult
+      list_contact_after_delete = list_contact_after_delete.data
       
       list_subscriptions_before_delete = list_contact_before_delete["list_subscriptions"].collect{|l| l["list_id"]}
       list_subscriptions_after_delete = list_contact_after_delete["list_subscriptions"].collect{|l| l["list_id"]}
