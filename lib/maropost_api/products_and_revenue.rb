@@ -2,7 +2,7 @@ require 'maropost_api/custom_types/order_item'
 
 module MaropostApi
   
-  class ProductAndRevenue
+  class ProductsAndRevenue
     
     def initialize(account = ENV["ACCOUNT"], api_key = ENV["API_KEY"])
       MaropostApi.instance_variable_set(:@api_key, api_key)

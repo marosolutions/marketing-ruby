@@ -1,4 +1,4 @@
-RSpec.describe MaropostApi::ProductAndRevenue do
+RSpec.describe MaropostApi::ProductsAndRevenue do
   
   before(:each) do
     @test_data = {
@@ -25,7 +25,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
   
   describe "---- Order Updates ----" do
     it "updates order for given original order id" do
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       org_order_id = @test_data[:original_order_id]
       # order_to_update = prod_and_rev.get_order_for_original_order_id(org_order_id)
       order = {
@@ -45,7 +45,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     end
     
     it "updates order for given order id" do
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       order_to_update = prod_and_rev.get_order_for_original_order_id(@test_data[:original_order_id])
       order_id = order_to_update.data["id"]
       
@@ -76,7 +76,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
       expect(new_order.data).to have_key "original_order_id"
       expect(new_order.data["original_order_id"]).to eq original_order_id
       
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       
       delete_result = prod_and_rev.delete_for_original_order_id(original_order_id)
       
@@ -95,7 +95,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     end
     
     it "deletes order for given order_id" do
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       
       original_order_id = Time.now.to_i.to_s << '_to_be_deleted'
       new_order = create_test_order(order: {original_order_id: original_order_id})
@@ -121,7 +121,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     end
     
     it "deletes products for given original_order_id" do
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       ## create products for given original_order_id first
       original_order_id = Time.now.to_i.to_s << '_to_be_deleted'
       new_order = create_test_order(order: {original_order_id: original_order_id})
@@ -137,7 +137,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     end
     
     it "deletes products for given order_id" do
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       ## create products for given original_order_id first
       original_order_id = Time.now.to_i.to_s << '_to_be_deleted'
       new_order = create_test_order(order: {original_order_id: original_order_id})
@@ -158,7 +158,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     it "gets order for specified id" do
       org_order_id = 'get-order-test-id-01'
       new_order = create_test_order(order: {original_order_id: org_order_id})
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       
       get_order = prod_and_rev.get_order(new_order.data['id'])
       
@@ -176,7 +176,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     it "gets order for specified original order id" do
       org_order_id = @test_data[:original_order_id]
       new_order = create_test_order(order: {original_order_id: org_order_id})
-      prod_and_rev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+      prod_and_rev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
       
       get_order = prod_and_rev.get_order_for_original_order_id(org_order_id)
       
@@ -195,7 +195,7 @@ RSpec.describe MaropostApi::ProductAndRevenue do
     private
     
       def create_test_order(contact: {}, order: {}, order_items: [])
-        prodrev = MaropostApi::ProductAndRevenue.new(@test_data[:account_id])
+        prodrev = MaropostApi::ProductsAndRevenue.new(@test_data[:account_id])
         contact = contact.merge({
           :first_name => 'Ashisih', :email => 'writetoaashu@gmail.com', :last_name => 'Acharya'
         })
