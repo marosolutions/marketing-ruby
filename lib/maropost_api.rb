@@ -3,6 +3,8 @@ require 'uri'
 require "maropost_api/campaigns"
 require "maropost_api/contacts"
 require "maropost_api/journeys"
+require "maropost_api/product_and_revenue"
+require "maropost_api/custom_types/operation_result"
 require "httparty"
 
 module MaropostApi
@@ -20,8 +22,8 @@ module MaropostApi
     full_path = path << ".#{format.to_s}"
     # pp "getting path: " << full_path, options
     result = get(full_path, options)
-
-    result.parsed_response
+    
+    OperationResult.new(result)
   end
   
   def self.post_result(path, form_body)
@@ -29,20 +31,19 @@ module MaropostApi
     full_path = path << ".#{format.to_s}"
     # set auth_token manually due to 400 error when sent via parameters
     full_path = full_path << "?auth_token=#{@api_key}"
-    # pp "posting to path: " << full_path
+    # puts form_body.to_json
     result = post(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'})
     
-    result.parsed_response
+    OperationResult.new(result)
   end
   
   def self.put_result(path, form_body = {}, query_params = {})
     raise ArgumentError "path and form_body cannot be nil" if path.nil? || form_body.nil?
     full_path = path << ".#{format.to_s}"
+    query_params = set_query_params if query_params.empty?
+    result = put(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json', 'Accept' => 'application/json'}, :query => query_params[:query])
     
-    # p full_path, '=====', query_params
-    result = put(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'}, :query => query_params[:query])
-    
-    result.parsed_response
+    OperationResult.new(result)
   end
   
   def self.delete_result(path, query_params)
@@ -50,7 +51,7 @@ module MaropostApi
     full_path = path << ".#{format.to_s}"
     result = delete(full_path, :headers => {"Content-Type" => 'application/json'}, :query => query_params[:query])
     
-    result.parsed_response
+    OperationResult.new(result)
   end
   
   def self.set_query_params(query_params = {})
