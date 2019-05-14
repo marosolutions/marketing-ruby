@@ -3,8 +3,9 @@ require 'uri'
 require "maropost_api/campaigns"
 require "maropost_api/contacts"
 require "maropost_api/journeys"
-require "maropost_api/product_and_revenue"
+require "maropost_api/products_and_revenue"
 require "maropost_api/custom_types/operation_result"
+require "maropost_api/ab_test_campaigns"
 require "httparty"
 
 module MaropostApi
