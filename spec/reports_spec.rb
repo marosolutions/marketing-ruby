@@ -260,5 +260,62 @@ RSpec.describe MaropostApi::Reports do
       end
     end
     
+    it "gets a list of Ab Reports for the provided filters" do
+      reports = @report.get(1)
+      complaint_reports = reports.data.select{|r| r['click'] > 0 }
+      complaint_reports.each do |report|
+        created_at = Date.parse(report['created_at']).to_s
+        
+        # use the only hint we have to get some reports and use futher
+        reports = @report.get_ab_reports(page: 1, :name => 'Test', :per => 2)
+        
+        expect(reports).to be_kind_of OperationResult
+        expect(reports.success).to eq true
+        expect(reports.data).not_to be_nil
+        expect(reports.data.first).to have_key 'id'
+
+        page_1_first_item_id = reports.data.first['id']
+        
+        # page 2
+        reports_2 = @report.get_ab_reports(page: 2, :name => 'Test', :per => 2)
+
+        expect(reports_2).to be_kind_of OperationResult
+        expect(reports_2.success).to eq true
+        expect(reports_2.data).not_to be_nil
+        expect(reports_2.data.first).to have_key 'id'
+
+        page_2_first_item_id = reports_2.data.first['id']
+        expect(page_1_first_item_id).not_to eq page_2_first_item_id
+        
+        break
+      end
+    end
+    
+    it "gets the list of all journeys" do
+      journeys = @report.get_journeys(1)
+      
+      expect(journeys).to be_kind_of OperationResult
+      expect(journeys.success).to eq true
+      expect(journeys.data).not_to be_nil
+      expect(journeys.data.first).to have_key 'created_at'
+      expect(journeys.data.first).to have_key 'total_pages'
+      expect(journeys.data.first['total_pages']).to be > 0
+      
+      first_page_id = Time.parse(journeys.data.first['created_at']).to_i
+      
+      # page 2
+      journeys2 = @report.get_journeys(2)
+      
+      expect(journeys2).to be_kind_of OperationResult
+      expect(journeys2.success).to eq true
+      expect(journeys2.data).not_to be_nil
+      expect(journeys2.data.first).to have_key 'created_at'
+      
+      second_page_id = Time.parse(journeys2.data.first['created_at']).to_i
+      
+      expect(first_page_id).not_to eq second_page_id
+      
+    end
+    
   end
 end

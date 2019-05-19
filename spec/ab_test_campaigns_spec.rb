@@ -10,7 +10,17 @@ RSpec.describe MaropostApi::AbTestCampaigns do
     
     ab_test_camp = MaropostApi::AbTestCampaigns.new(@test_data[:account_id])
     
-    ab_test_camp.create_ab_test('my name')
+    create_result = ab_test_camp.create_ab_test(
+      :name => 'Test AbTestCampaign User',
+      :from_email => 'fakeemail@abtestcampaign.com',
+      :language => 'English',
+      :address => 'Kathmandu, Nepal',
+      :campaign_groups_attributes => ['some attributes'],
+      :commit => 'Save as Draft',
+      :sendAt => Time.now
+    )
+    
+    # pp create_result
     
   end
 end

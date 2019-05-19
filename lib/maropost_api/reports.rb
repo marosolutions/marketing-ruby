@@ -75,6 +75,24 @@ module MaropostApi
       MaropostApi.get_result(full_path, query_params)
     end
     
+    def get_ab_reports(name:, page:, from: nil, to: nil, per: nil)
+      full_path = full_resource_path('', "ab_reports")
+      params = {}
+      method(__method__).parameters.each{|p| params[p[1]] = eval(p[1].to_s)}
+      params.reject!{|k,v| v.nil? or (v.respond_to? :empty? and v.empty?) }
+
+      query_params = MaropostApi.set_query_params(params)
+      
+      MaropostApi.get_result(full_path, query_params)
+    end
+    
+    def get_journeys(page)
+      full_path = full_resource_path '/journeys'
+      query_params = MaropostApi.set_query_params({:page => page})
+      
+      MaropostApi.get_result(full_path, query_params)
+    end
+    
     
       private
     

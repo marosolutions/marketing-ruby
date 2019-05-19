@@ -26,14 +26,23 @@ module MaropostApi
       segments: []
     )
       args = method(__method__).parameters
-      body = {contact: {}}
+      body = {:ab_test => {}}
       args.each do |arg|
         k = arg[1].to_s
         v = eval(k)
-        body[:contact][k] = v unless v.nil?
+        body[:ab_test][k] = v unless v.nil?
       end
       
-      pp body
+      full_path = full_resource_path('/ab_test')
+
+      MaropostApi.post_result(full_path, :body => {campaign: body[:ab_test]})
     end
+  
+    private
+    
+      def full_resource_path(specifics = '', root_resource = "campaigns")
+        account = MaropostApi.instance_variable_get(:@account)
+        "/accounts/#{account}/#{root_resource}" << specifics
+      end
   end
 end
