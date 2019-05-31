@@ -7,9 +7,9 @@ Gem::Specification.new do |spec|
   spec.name          = "maropost_api"
   spec.version       = MaropostApi::VERSION
   spec.authors       = ["Ashish Acharya"]
-  spec.email         = ["ashish.acharya@moduscreate.com"]
+  spec.email         = ["aacharya@ap-logic.com"]
 
-  spec.summary       = "Test Summary"
+  spec.summary       = "A consumer gem for Maropost.com api"
   spec.description   = "test Description"
   spec.homepage      = "https://api.maropost.com"
 

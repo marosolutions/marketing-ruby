@@ -8,6 +8,7 @@ require "maropost_api/custom_types/operation_result"
 require "maropost_api/ab_test_campaigns"
 require "maropost_api/reports"
 require "maropost_api/relational_tables"
+require "maropost_api/transactional_campaigns"
 require "httparty"
 
 module MaropostApi
@@ -34,7 +35,7 @@ module MaropostApi
     full_path = path << ".#{format.to_s}"
     # set auth_token manually due to 400 error when sent via parameters
     full_path = full_path << "?auth_token=#{@api_key}"
-    # puts form_body.to_json, full_path
+    puts form_body.to_json, full_path
     result = post(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'})
     
     OperationResult.new(result)
