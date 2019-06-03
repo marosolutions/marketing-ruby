@@ -1,7 +1,6 @@
 class OperationResult
   attr_accessor :errors, :success, :data
   def initialize(result)
-    # pp JSON.parse(result.body)
     if (200..206).to_a.include? result.code
       @success = true
       @errors = nil
@@ -10,8 +9,9 @@ class OperationResult
       @data = nil if @data == ""
     else
       @success = false
-      @errors = JSON.parse(JSON.parse([result.body].to_json).first)
+      @errors = JSON.parse(JSON.parse([result.body].to_json).first) if result.code != 404
       @errors = nil if @errors == ""
+      @errors['message'] = 'Page not found!' if result.code == 404
     end
   end
 end

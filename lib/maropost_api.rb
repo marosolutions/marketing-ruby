@@ -11,8 +11,14 @@ require "maropost_api/relational_tables"
 require "maropost_api/transactional_campaigns"
 require "httparty"
 
+##
+# This package provides programmatic access to several Maropost services. It consists of eight services within the MaropostApi
+# namespace. Each service consists of one or more functions that perform an operation against your Maropost account. These methods
+# return a result object indicating success/failure, any Exceptions thrown, and the resulting data.
+#
 module MaropostApi
   include HTTParty
+  # debug_output $stdout
   include URI
   format :json
   base_uri 'https://api.maropost.com'
@@ -24,7 +30,6 @@ module MaropostApi
   
   def self.get_result(path, options)
     full_path = path << ".#{format.to_s}"
-    # pp "getting path: " << full_path, options
     result = get(full_path, options)
     
     OperationResult.new(result)
@@ -35,7 +40,6 @@ module MaropostApi
     full_path = path << ".#{format.to_s}"
     # set auth_token manually due to 400 error when sent via parameters
     full_path = full_path << "?auth_token=#{@api_key}"
-    puts form_body.to_json, full_path
     result = post(full_path, :body => form_body.to_json, :headers => {"Content-Type" => 'application/json'})
     
     OperationResult.new(result)
@@ -53,7 +57,6 @@ module MaropostApi
   def self.delete_result(path, query_params, body={})
     raise ArgumentError "path and query_params cannot be nil" if path.nil? || query_params.nil?
     full_path = path << ".#{format.to_s}"
-    # pp full_path, query_params, body
     result = delete(full_path, :headers => {"Content-Type" => 'application/json'}, :query => query_params[:query], :body => body.to_json)
     
     OperationResult.new(result)

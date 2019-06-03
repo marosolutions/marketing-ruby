@@ -1,4 +1,8 @@
 module MaropostApi
+
+  ##
+  # It contains methods that get reports based on provided parameters.
+  # The method names themselves reveal the type of reports they are getting.
   class Reports
     
     def initialize(account = ENV["ACCOUNT"], api_key = ENV["API_KEY"])
