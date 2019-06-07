@@ -6,7 +6,6 @@ module MaropostApi
   class Reports
     ##
     # Creates a new instance of Reports class.
-    # Takes +account+ and +api_key+ as parameters where 
     # @param account [Integer] is authentic user account id (Integer) provided by maropost.com
     # @param api_key [String] is the auth token (String) that is validated on the server to authenticate the user
     def initialize(account = ENV["ACCOUNT"], api_key = ENV["API_KEY"])

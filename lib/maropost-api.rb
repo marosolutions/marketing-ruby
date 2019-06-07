@@ -14,7 +14,8 @@ require "httparty"
 ##
 # This package provides programmatic access to several Maropost services. It consists of eight services within the MaropostApi
 # namespace. Each service consists of one or more functions that perform an operation against your Maropost account. These methods
-# return a result object indicating success/failure, any Exceptions thrown, and the resulting data.
+# return a result object indicating success/failure, any Exceptions thrown, and the resulting data. The detailed documentation of the
+# api can be found in http://api.maropost.com/api
 #
 module MaropostApi
   include HTTParty

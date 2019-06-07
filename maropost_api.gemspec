@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "A consumer gem for Maropost.com api"
   spec.description   = "test Description"
-  spec.homepage      = "https://api.maropost.com"
+  spec.homepage      = "https://api.maropost.com/api"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
@@ -35,7 +35,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "httparty"
+  spec.add_dependency "httparty", "~> 0.17.0"
 
   spec.add_development_dependency "bundler", "~> 1.17"
   spec.add_development_dependency "rake", "~> 10.0"
