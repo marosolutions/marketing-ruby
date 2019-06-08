@@ -1,1 +1,632 @@
-# marketing-ruby
+# Summary
+
+This provides programmatic access to several services within the Maropost API. The functions contained perform actions against your Maropost account, and they return a result object indicating success/failure, any Exceptions thrown, and the resulting data.
+
+# Installation
+
+[RubyGems](https://rubygems.org/) is the standard Ruby packaging system. You can find this package at https://rubygems.org/gems/maropost-api. You can install this gem by running
+
+    gem install maropost-api
+
+# Usage
+To use a service, first instantiate it, providing your Maropost AccountId
+and Auth Token. For example, to get your list of reports using the Reports
+service, execute:
+
+    reports = MaropostApi::Reports.new(accountId, authToken)
+    result = reports.Get(1);
+    if result.success {
+        myReports = result.data;
+    }
+
+The result object contains two fields:
+
+- `success` (bool)
+- `errors` (object)
+
+If `success` is `false`, then `errors` will have details about the reason for
+failure. If `errors` is not `nil`, then `success` will always be `false`.
+
+The object might also contain one property, `data` (dynamic), which contains whatever
+data the operation itself provides. Some operations, such as `Delete()`
+operations, might not provide any data.
+
+# Specific APIs
+The specific APIs contained are:
+
+- [Campaigns](#campaigns)
+- [AB Test Campaigns](#ab-test-campaigns)
+- [Transactional Campaigns](#transactional-campaigns)
+- [Contacts](#contacts)
+- [Journeys](#journeys)
+- [Product and Revenue](#product-and-revenue)
+- [Relational Table Rows](#relational-table-rows)
+- [Reports](#reports)
+
+## Campaigns
+### Instantiation:
+
+    MaropostApi::Campaigns.new(int accountId, string authToken)
+
+### Available methods:
+
+ - `Get(int page)`
+   - returns the list of campaigns for the account
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `GetCampaign(int id)`
+   - returns the given campaign
+   - `id: campaign id`
+ - `GetBounceReports(int id, int page)`
+   - returns the list of bounce reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `GetClickReports(int id, int page, bool? unique = null)`
+   - returns the list of click reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+   - `unique`: `true` = get for unique contacts. Otherwise, `false`. 
+ - `GetComplaintReports(int id, int page)`
+   - returns the list of complaint reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `GetDeliveredReports(int id, int page)`
+   - returns the list of delivered reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `GetHardBounceReports(int id, int page)`
+   - returns the list of hard bounces for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `GetLinkReports(int id, int page, bool? unique = null)`
+   - returns the list of link reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+   - `unique`: `true` = get for unique contacts. Otherwise, `false`. 
+ - `GetOpenReports(int id, int page, bool? unique = null)`
+   - returns the list of open reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+   - `unique`: `true` = get for unique contacts. Otherwise, `false`. 
+ - `GetSoftBounceReports(int id, int page)`
+   - returns the list of soft bounce reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `GetUnsubscribeReports(int id, int page)`
+   - returns the list of unsubscribe reports for the given campaign ID
+   - `id: campaign id`
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+   
+## AB Test Campaigns
+### Instantiation:
+
+    MaropostApi::AbTestCampaigns.new(int accountId, string authToken)
+
+### Available Methods:
+ - `create_ab_test(string name, string fromEmail, string replyTo, string address, Enums.Language language, IEnumerable<Dto.CampaignGroupAttributeInput> campaignGroupAttributes,`
+                  `Enums.Commit commit, Enums.DecidedBy decidedBy, DateTime sendAt, int? brandId = null, IEnumerable<int> suppressedListIds = null, IEnumerable<int> suppressedSegmentIds = null,`
+                  `IEnumerable<int> suppressedJourneyIds = null, int? emailPreviewLink = null, IEnumerable<int> lists = null,`
+                  `IEnumerable<int> cTags = null, IEnumerable<int> segments = null)`
+   * Creates an Ab Test campaign
+   - `name`: name of the new campaign
+   - `fromEmail`: default sender email address for campaign emails
+   - `replyTo`: default reply-to email address for campaign emails
+   - `address`: default physical address included on campaign emails
+   - `sendAt`: non-null required
+   
+## Transactional Campaigns
+
+### Instantiation:
+
+    MaropostApi::TransactionalCampaigns.new(int accountId, string authToken)
+
+### Available methods:
+ - `get(int page)`
+     * returns the list of Transaction Campaigns
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+ - `create(string name, string subject, string preheader, string fromName, string fromEmail, string replyTo,`
+           `int contentId, bool emailPreviewLink, string address, string language, object[] ctags)`
+     * Creates a Transactional Campaign
+     - `name` campaign name
+     - `subject` campaign subject
+     - `preheader` campaign preheader
+     - `fromName` sender name in the email
+     - `fromEmail` sender email address
+     - `replyTo` reply-to email address
+     - `contentId`
+     - `emailPreviewLink`
+     - `address` physical address
+     - `language` ISO 639-1 language code
+     - `ctags` array of campaign tags
+
+ - `send_email(int campaignId, int? contentId = null, string contentName = null, string contentHtmlPart = null, string contentTextPart = null,`
+              `int? sendAtHour = null, int? sendAtMinute = null, bool? ignoreDnm = null, int? contactId = null, string recipientEmail = null,`
+              `string recipientFirstName = null, string recipientLastName = null, IDictionary<string, object> recipientCustomFields = null,`
+              `string bccEmail = null, string fromName = null, string fromEmail = null, string subject = null, string replyTo = null,`
+              `string senderAddress = null, IDictionary<string, object> tags = null, IEnumerable<string> ctags = null)`
+     * Sends a transactional campaign email to a recipient. Sender's information will be automatically fetched from the transactional campaign, unless provided in the function arguments.
+     - `campaignId`: must be a campaign that already exists when you call `$svc->get()`. If you don't have one, first call `$svc->create()`.
+     - `contentId`: If provided, the transactional campaign's content will be replaced by this content.
+     - `contentName`: If $contentId is null, the transactional campaign's content name will be replaced by this name.
+     - `contentHtmlPart`: If $contentId is null, the transactional campaign's content HTML part will be replaced by this HTML part.
+     - `contentTextPart`: If $contentId is null, the transactional campaign's content Text part will be replaced by this Text part.
+     - `sendAtHour`: Must be 1-12. Otherwise the email will go out immediately. If the hour is less than the current hour, the email will go out the following day.
+     - `sendAtMinute`: Must be 0-60. Otherwise will be treated as 0. If the hour and minute combine to less than the current time, the email will go out the following day.
+     - `ignoreDnm`: If true, ignores the Do Not Mail list for the recipient contact.
+     - `contactId`: contact ID of the recipient.
+     - `recipientEmail`: email address. Ignored unless `$contactId` is null. Otherwise, it must be a well-formed email address according to `FILTER_VALIDATE_EMAIL`.
+     - `recipientFirstName`: recipient's first name. Ignored unless `$contactId` is null.
+     - `recipientLastName`: recipient's last name. Ignored unless `$contactId` is null.
+     - `recipientCustomFields`: custom fields for the recipient. Ignored unless `$contactId` is null. Is a Dictionary where the item key is the name of the custom field, and the item value is the field value. All values must be non-null scalars.
+     - `bccEmail`: BCC recipient. May only pass a single email address, empty string, or null. If provided, it must be a well-formed email address according to `FILTER_VALIDATE_EMAIL`.
+     - `fromName`: sender's name. If `$fromEmail` is set, it overrides the transactional campaign default sender name. Ignored otherwise.
+     - `fromEmail`: sender's email address. Overrides the transactional campaign default sender email.
+     - `subject`: subject line of email. Overrides the transactional campaign default subject.
+     - `replyTo`: reply-to address. Overrides the transactional campaign default reply-to.
+     - `senderAddress`: physical address of sender. Overrides the transactional campaign default sender address.
+     - `tags`: Dictionary where the item key is the name of the tag within the content, and the item value is the tag's replacement upon sending. All values must be non-null scalars.
+     - `ctags`: campaign tags. Must be a simple array of scalar values.
+     
+## Contacts
+
+### Instantiation:
+	
+	MaropostApi::Contacts.new(int accountId, string authToken)
+
+### Available methods:
+
+ - `get_for_email(string email)`
+   * Gets the contact according to email address 
+   - `email`: email address of the contact
+
+ - `get_opens(int contactId, int page)`
+   * Gets the list of opens for the specified contact
+   - `contactId`: contact id of contact to for which the contact is being retrieved
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+
+ - `get_clicks(int contactId, int page)`
+   * Gets the list of clicks for the specified contact
+   - `contactId`: contact id of contact to for which the contact is being retrieved
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+
+ - `get_for_list(int listId, int page)`
+   * Gets the list of contacts for the specified list
+   - `listId`: ID of the list to which the contact being retrieved
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+
+ - `get_contact_for_list(int listId, int contactId)`
+   - Gets the specified contact from the specified list
+   - `listId`: ID of the list to which the contact is being retrieved
+   - `contactId`: contact id of contact to for which the contact is being retrieved
+
+ - `create_or_update_for_list(int listId, string email, string firstName = null, string lastName = null, string phone = null,`
+														  `string fax = null, string uid = null, object customField = null, object addTags = null,`
+														  `object removeTags = null, bool removeFromDNM = true, bool subscribe = true)`
+     * Creates a contact within a list. Updates if previous contact is matched by email
+     - `listId`: ID of the list to which the contact being updated belongs
+     - `contactId`: ID of the contact being updated
+     - `email`: Email address for the contact to be updated
+     - `firstName`: first name of Contact
+     - `lastName`: last name of Contact
+     - `phone`: phone number of Contact
+     - `fax`: fax number of Contact
+     - `uid`: UID for the Contact
+     - `customField`: custom fields passed as associative array. Keys represent the field names while values represent the values
+     - `addTags`: tags to add to the contact. Simple array of tag names
+     - `removeTags`: tags to remove from the contact. Simple array of tag names
+     - `removeFromDNM`: set this true to subscribe contact to the list, and remove it from DNM)
+     - `subscribe`: set this true to subscribe contact to the list; false otherwise
+  
+ - `update_for_list_and_contact(int listId, string contactId, string email, string firstName = null, string lastName = null, string phone = null, string fax = null,`
+															`string uid = null, object customField = null, object addTags = null, object removeTags = null, bool removeFromDNM = true, bool subscribe = true)`
+     * Creates a contact within a list. Updates if previous contact is matched by email.
+     - `listId`: ID of the list for which the contact is being created
+     - `email`: email address for the contact to be created|updated
+     - `firstName`: first name of Contact
+     - `lastName`: last Name of Contact
+     - `phone`: phone number of Contact
+     - `fax`: fax number of Contact
+     - `uid`: UID for the contact
+     - `customField`: custom fields passed as associative array. Keys represent the field names while values represent the values.
+     - `addTags`: tags to add to the contact. Simple array of tag names (strings).
+     - `removeTags`: tags to remove from the contact. Simple array of tag names (strings).
+     - `removeFromDNM`: Set this true to subscribe contact to the list, and remove it from DNM.
+     - `subscribe`: true to subscribe the contact to the list; false otherwise.
+
+ - `create_or_update_contact(string email, string firstName = null, string lastName = null, string phone = null, string fax = null, string uid = null,`
+														  `object customField = null, object addTags = null, object removeTags = null, bool removeFromDNM = true, bool subscribe = true)`
+     * Creates a contact without a list. Updates if already existing email is passed.
+     - `contactId`: ID of the contact
+     - `email`: Email address for the contact to be created|updated
+     - `firstName`: first name of Contact
+     - `lastName`: last Name of Contact
+     - `phone`: phone number of Contact
+     - `fax`: fax number of Contact
+     - `uid`: UID for the contact
+     - `customField`: custom fields passed as associative array. Keys represent the field names while values represent the values
+     - `addTags`: tags to add to the contact. Simple array of tag names (strings).
+     - `removeTags`: tags to remove from the contact. Simple array of tag names (strings).
+     - `removeFromDNM`: set this true to subscribe contact to the list, and remove it from DNM
+	 - `subscribe`: true to subscribe the contact to the list; false otherwise.
+
+ - `create_or_update_for_list_and_workflows(string email, string firstName = null, string lastName = null, string phone = null, string fax = null, string uid = null,`
+																	  `object customField = null, object addTags = null, object removeTags = null, bool removeFromDNM = false, int[] subscribeListIds = null,`
+																	  `int[] unsubscribeListIds = null, int[] unsubscribeWorkflowIds = null, string unsubscribeCampaign = null)`
+     * Creates or updates Contact
+        - Multiple lists can be subscribed, unsubscribed. 
+        - Multiple workflows can be unsubscribed.
+     - `email`: email address for the contact to be created|updated
+     - `firstName`: first name of Contact
+     - `lastName`: last name of Contact
+     - `phone`: phone number of Contact
+     - `fax`: fax number of Contact
+     - `uid`: UID for the Contact
+     - `customField`: custom fields passed as associative array. Keys represent the field names while values represent the values
+     - `addTags`: tags to add to the contact. Simple array of tag names (strings)
+     - `removeTags`: tags to remove from the contact. Simple array of tag names (strings)
+     - `removeFromDNM`: set this true to subscribe contact to the list, and remove it from DNM
+     - `subscribeListIds`: simple array of IDs of lists to subscribe the contact to
+     - `unsubscribeListIds`: simple array of IDs of Lists to unsubscribe the contact from
+     - `unsubscribeWorkflowIds`: simple array of list of IDs of workflows to unsubscribe the contact from
+     - `unsubscribeCampaign`: campaignID to unsubscribe the contact from
+
+ - `delete_from_all_lists(string email)`
+     * Deletes specified contact from all lists
+     - `email`: email address of the contact
+
+ - `delete_from_lists(int contactId, int[] listIds = null)`
+     * Deletes the specified contact from the specified lists
+     - `contactId`: id of the contact
+     - `listIds`: simple array of ids of the lists
+
+ - `delete_contact_for_uid(string uid)`
+     * Deletes contact having the specified UID
+	 - `uid`: UID of the Contact for which the contact is being deleted
+
+ - `delete_list_contact(int listId, int contactId)`
+     * Deletes specified contact from the specified list
+	 - `listId`: ID of the list for which the contact is being deleted
+	 - `contactId`: contact id of the list for which the contact is being deleted
+
+ - `unsubscribe_all(string contactFieldValue, string contactFieldName = "email")`
+     * Unsubscribes contact having the specified field name/value.
+     - `contactFieldValue`: the value of the field for the contact(s) being unsubscribed
+     - `contactFieldName`: the name of the field being checked for the value. At present, the accepted field names are: 'email' or 'uid'
+
+## Journeys
+
+### Instantiation:
+
+    MaropostApi::Journeys.new(int accountId, string authToken)
+
+### Available methods:
+
+ - `get(int page)`
+     * Gets the list of journeys
+     - `page`: page # (>= 1). Up to 200 records returned per page.
+
+ - `get_campaigns(int journeyId, int page)`
+     * Gets the list of all campaigns for the specified journey
+	 - `journeyId`: get campaigns filtered with journeyid
+     - `page`: page # (>= 1). Up to 200 records returned per page.
+
+ - `get_contacts(int journeyId, int page)`
+     * Gets the list of all contacts for the specified journey
+	 - `journeyId`: get contacts filtered with journeyid
+     - `page` : page # (>= 1). Up to 200 records returned per page.
+
+ - `stop_all(int contactId, string recipientEmail, string uid, int page)`
+     * Stops all journeys, filtered for the matching parameters
+     - `contactId`: this filter ignored unless greater than 0
+     - `recipientEmail`: this filter ignored if null
+     - `uid`: this filter ignored if null
+	 - `page`: page # (>= 1). Up to 200 record returned per page.
+
+ - `pause_journey_for_contact(int journeyId, int contactId)`
+     * Pause the specified journey for the specified contact
+	 - `journeyId`: pause journey for speficied journey id
+	 - `contactId`: pause journey for speficied contact id
+
+ - `pause_journey_for_uid(int journeyId, string uid)`
+     * Pause the specified journey for the contact having the specified UID
+	 - `journeyId`: pause journey for specified journey id
+	 - `uid`: pause journey for speficified uid
+
+ - `reset_journey_for_contact(int journeyId, int contactId)`
+     * Reset the specified journey for the specified active/paused contact. Resetting a contact to the beginning of the journeys will result in sending of the same journey campaigns as originally sent.
+	 - `journeyId`: reset journey for contact with specified journey id
+	 - `contactId`: reset journey for specified contact id
+
+ - `reset_journey_for_uid(int journeyId, string uid)`
+     * Restarts a journey for a paused contact having the specified UID. Adds a new contact in journey. Retriggers the journey for a contact who has finished its journey once. (To retrigger, *make sure* that "Retrigger Journey" option is enabled.)
+	 - `journeyId`: reset journey for specified journey id
+	 - `uid`: reste journey for specified uid
+
+ - `start_journey_for_contact(int journeyId, int contactId)`
+	* Starts a journey for contact having specified journeyId
+	- `journeyId`: start journey for specified journey id
+	- `contactId`: contact id of contact to start journey
+
+ - `start_journey_for_uid(int journeyId, string uid)`
+	* Starts a journey for contact having specified uid and journeyId
+	- 'journeyId': journey id to start journey
+	- 'uid': uid of contact to start journey
+
+## Product and Revenue
+
+### Instantiation:
+
+    MaropostApi::ProductsAndRevenue.new(int accountId, string authToken)
+
+### Available methods:
+
+ - `get_order(int id)`
+     * Gets the specified order
+ - `get_order_for_original_order_id(string originalOrderId)`
+     * Gets the specified order
+
+ - `create_order(bool requireUnique,`
+                `string contactEmail,`
+                `string contactFirstName,`
+                `string contactLastName,`
+                `string orderDateTime,`
+                `string orderStatus,`
+                `string originalOrderId,`
+                `IEnumerable<OrderItemInput> orderItems,`
+                `IDictionary<string, string> customFields = null,`
+                `IEnumerable<string> addTags = null,`
+                `IEnumerable<string> removeTags = null,`
+                `string uid = null,`
+                `string listIds = null,`
+                `decimal? grandTotal = null,`
+                `int? campaignId = null,`
+                `string couponCode = null)`
+     * Creates an order
+     - `requireUnique`: true to validate that the order has a unique original_order_id for the given contact.
+     - `contactEmail`: email address of contact
+     - `contactFirstName`: first name of contact
+     - `contactLastName`: last name of contact
+     - `orderDateTime`: uses the format: "YYYY-MM-DDTHH:MM:SS-05:00"
+     - `orderStatus`: status of order
+     - `originalOrderId`: sets the original_order_id field
+     - `orderItems`: must contain at least one OrderItemInput. When creating an OrderItemInput, do not manually set the properties. Just use the constructor, itself having the parameters:
+	     - itemId
+		 - price: price of the orderItem
+		 - quantity: quantity purchased
+		 - description: description of the product
+		 - adcode: adcode of the orderItem
+		 - category: category of the product
+     - `customFields` Dictionary Item key represents the field name and the Dictionary Item value is the field value
+     - `addTags` tags to add
+     - `removeTags` tags to remove
+     - `uid`: unique id
+     - `listIds` CSV list of IDs (e.g, "12,13")
+     - `grandTotal`: grand total
+     - `campaignId`: campaign id
+     - `couponCode`: coupon code
+
+ - `update_order_for_original_order_id(string originalOrderId,`
+                                      `string orderDateTime,`
+                                      `string orderStatus,`
+                                      `IEnumerable<OrderItemInput> orderItems,`
+                                      `int? campaignId = null,`
+                                      `string couponCode = null)`
+     * Updates an existing eCommerce order using unique original_order_id if the details are changed due to partial return or some other update.
+     - `originalOrderId`: matches the original_order_id field of the order
+     - `orderDateTime`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
+     - `orderStatus`: order status
+     - `orderItems`: must contain at least one orderItem.
+     - `campaignId`: campaign id
+     - `couponCode`: coupon code
+
+ - `update_order_for_order_id(int orderId,`
+                              `string orderDateTime,`
+                              `string orderStatus,`
+                              `IEnumerable<OrderItemInput> orderItems,`
+                              `int? campaignId = null,`
+                              `string couponCode = null)`
+     * Updates an existing eCommerce order using unique order_id if the details are changed due to partial return or some other update.
+     - `orderId`: matches the Maropost order_id field of the order
+     - `orderDateTime`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
+     - `orderStatus`: order status
+     - `orderItems`: must contain at least one orderItem.
+     - `campaignId`: campaign id
+     - `couponCode`: coupon code
+    
+ - `delete_for_original_order_id(string originalOrderId)`
+     * Deletes the complete eCommerce order if the order is cancelled or returned
+     - `originalOrderId` matches the original_order_id field of the order
+
+ - `delete_for_order_id(int id)`
+     * Deletes the complete eCommerce order if the order is cancelled or returned using Maropost order id
+     - `id`: Maropost order_id
+
+ - `delete_products_for_original_order_id(string originalOrderId,object[] productIds)`
+     * Deletes the specified product(s) from a complete eCommerce order if the product(s) is cancelled or returned
+     - `originalOrderId`: matches the original_order_id field of the order
+     - `productIds`: the product(s) to delete from the order
+
+ - `delete_products_for_order_id(int id,object[] productIds)`
+     * Deletes the specified product(s) from a complete eCommerce order if the product(s) is cancelled or returned
+     - `id`: Maropost order_id
+     - `productIds`: the product(s) to delete from the order
+
+## Relational Table Rows
+
+### Instantiation:
+Unlike the other services, the constructor for this requires a fourth
+parameter: `tableName`. So for example:
+
+    MaropostApi::RelationalTableRows.new(myAccountId, myAuthToken, "someTableName")
+
+`tableName` sets which relational table the service's operations should act against.
+To switch tables, you do not need to re-instantiate the service. Simply update the `TableName` property of the instance:
+
+    rows = MaropostApi::RelationalTableRows.new(myId, myToken, "table1");
+	rows.TableName = "table2";
+
+### Available functions:
+
+ - `get()`
+     * Gets the records of the Relational Table
+
+ - `show(string idFieldName, string idFieldVlaue)`
+     * Gets the specified record from the Relational Table
+     * `id`: ID of the existing record you wish to read
+
+ - `create(IDictionary<string, object> keyValues)`
+     * Adds a record to the Relational Table
+     * `keyValues`: Multiple `Dictionary<stringm object>` objects, for the
+     record to be created, each item consisting of two fields:
+       - `key`: string representing the name of the field
+       - `value`: scalar value representing the new value for the field.
+         - Any DateTime strings must be in one of three formats: "MM/DD/YYYY", 
+         "YYYY-MM-DD", or "YYYY-MM-DDThh:mm:ssTZD".
+       - NOTE: One of the KeyValues must represent the unique identifier.
+
+ - `update(IDictionary<string, object> keyValues)`
+     * Updates a record in the Relational Table.
+     * `keyValues`: Multiple `Dictionary<stringm object>` objects, for the
+     record to be created, each item consisting of two fields:
+       - `key`: string representing the name of the field
+       - `value`: scalar value representing the new value for the field.
+         - Any DateTime strings must be in one of three formats: "MM/DD/YYYY", 
+         "YYYY-MM-DD", or "YYYY-MM-DDThh:mm:ssTZD".
+       - NOTE: One of the KeyValues must represent the unique identifier.
+
+ - `upsert(IDictionary<string, object> keyValues)`
+     * Creates or updates a record in the Relational Table.
+     * `keyValues`: Multiple `Dictionary<stringm object>` objects, for the
+     record to be created, each item consisting of two fields:
+       - `key`: string representing the name of the field
+       - `value`: scalar value representing the new value for the field.
+         - Any DateTime strings must be in one of three formats: "MM/DD/YYYY", 
+         "YYYY-MM-DD", or "YYYY-MM-DDThh:mm:ssTZD".
+       - NOTE: One of the KeyValues must represent the unique identifier.
+
+ - `delete(string idField, object idFieldValue)`
+     * Deletes the given record of the Relational Table
+     * `idField` name of the field representing the unique identifier (E.g., "id", "email")
+     * `idFieldValue` value of the identifier field, for the record to delete.
+
+## Reports
+
+### Instantiation:
+
+    MaropostApi::Reports.new(int accountId, string authToken)
+
+### Available methods:
+ - `get(int page)`
+   - returns the list of reports
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+
+ - `get_report(int id)`
+   - Gets the list of reports
+   - `id`: report ID
+
+ - `get_opens(int page,`
+             `object[] fields = null,`
+             `DateTime? from = null,`
+             `DateTime? to = null,`
+             `bool? unique = null,`
+             `string email = null,`
+             `string uid = null,`
+             `int? per = null)`
+   * returns the list of open reports based on filters and fields provided
+   - `page`: page # (>= 1). Up to 200 records returned per page.
+   * `fields`: contact field names to retrieve
+   * `from`: the beginning of date range filter
+   * `to`: the end of the date range filter
+   * `unique`: when true, gets only unique opens
+   * `email`: filters by provided email in the contact
+   * `uid`: filters by uid
+   * `per`: determines how many records per request to receive
+
+ - `get_clicks(int page,`
+              `object[] fields = null,`
+              `DateTime? from = null,`
+              `DateTime? to = null,`
+              `bool? unique = null,`
+              `string email = null,`
+              `string uid = null,`
+              `int? per = null)`
+   * returns the list of click reports
+   * `page`: page # (>= 1). Up to 200 records returned per page.
+   * `fields`: plucks these contact fields if they exist
+   * `from`: start of specific date range filter
+   * `to`: end of date range filter
+   * `unique`: if true, gets unique records
+   * `email`: gets Clicks for specific email
+   * `uid`: gets Clicks for provided uid
+   * `per`: gets the specified number of records
+
+ - `get_bounce(int page,`
+              `object[] fields = null,`
+              `DateTime? from = null,`
+              `DateTime? to = null,`
+              `bool? unique = null,`
+              `string email = null,`
+              `string uid = null,`
+              `string type = null,`
+              `int? per = null)`
+   * returns the list of bounce reports
+   * `page`: page # (>= 1). Up to 200 records returned per page.
+   * `fields`: plucks these contact fields if they exist
+   * `from`: start of specific date range filter
+   * `to`: end of date range filter
+   * `unique`: if true, gets unique records
+   * `email`: gets Bounces for specific email
+   * `uid`: gets Bounces for provided uid
+   * 'type`: if provided, should be either "soft", or "hard".
+   * `per`: gets the specified number of records
+
+ - ` get_unsubscribes(int page,`
+                     `object[] fields = null,`
+                     `DateTime? from = null,`
+                     `DateTime? to = null,`
+                     `bool? unique = null,`
+                     `string email = null,`
+                     `string uid = null,`
+                     `int? per = null)`
+   * returns the list of Unsubscribes with provided filter constraints
+   * `page`: page # (>= 1). Up to 200 records returned per page.
+   * `fields`: plucks these contact fields if they exist
+   * `from`: start of specific date range filter
+   * `to`: end of date range filter
+   * `unique` if true, gets unique records
+   * `email` gets Unsubscribes for specific email
+   * `uid` gets Unsubscribes for provided uid
+   * `per` gets the specified number of records
+
+ - `get_complaints(int page,`
+                  `object[] fields = null,`
+                  `DateTime? from = null,`
+                  `DateTime? to = null,`
+                  `bool? unique = null,`
+                  `string email = null,`
+                  `string uid = null,`
+                  `int? per = null)`
+   * returns the list of complaints filtered by provided params
+   * `page`: page # (>= 1). Up to 200 records returned per page.
+   * `fields`: plucks these contact fields if they exist
+   * `from`: start of specific date range filter
+   * `to`: end of date range filter
+   * `unique`: if true, gets unique records
+   * `email`: gets Complaints for specific email
+   * `uid`: gets Complaints for provided uid
+   * `per`: gets the specified number of records
+
+ - ` get_ab_reports(string name,`
+                  `int page,`
+                  `DateTime? from = null,`
+                  `DateTime? to = null,`
+                  `int? per = null)`
+   * returns the list of Ab Reports
+   * `name`: to get ab_reports with mentioned name
+   * `page`: page # (>= 1). Up to 200 records returned per page.
+   * `from`: beginning of date range filter
+   * `to`: end of date range filter
+   * `per`: gets the mentioned number of reports
+
+ - `get_journey(int page)`
+   * returns the list of all Journeys
+   * `page`: page # (>= 1). Up to 200 records returned per page.
