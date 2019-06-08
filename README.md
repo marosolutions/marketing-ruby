@@ -93,14 +93,31 @@ The specific APIs contained are:
 
 ### Available Methods:
  - `create_ab_test(name, from_email, address, language, campaign_groups_attributes,`
-                  `commit, sendAt, brand_id = nil, suppressed_list_ids = [],`
-                  `suppressed_journey_ids = [], suppressed_segment_ids = [], emailPreviewLink = nil,`
-                  `decided_by = nil, lists = [], ctags = [], segments = [])`
+                  `commit, sendAt, brand_id: nil, suppressed_list_ids: [],`
+                  `suppressed_journey_ids: [], suppressed_segment_ids: [], emailPreviewLink: nil,`
+                  `decided_by: nil, lists: [], ctags: [], segments: [])`
    * Creates an Ab Test campaign
    - `name`: name of the new campaign
    - `from_email`: default sender email address for campaign emails
    - `address`: default physical address included on campaign emails
-   - `sendAt`: non-nil required
+   - `language`: ISO 639-1 language code (e.g., "en"). 2 characters
+   - `campaign_groups_attributes`: array of attributes. Each attribute is itself a hash with the following properties (all strings):
+     - `name`: name of the group
+     - `content_id`: content ID
+     - `subject`: subject line of emails
+     - `from_name`: "from name" on emails
+     - `percentage`: percentage of emails that should be send with these settings 
+   - `commit`: allowed values: 'Save as Draft' or 'Send Test' or 'Schedule'
+   - `sendAt`: should be in "yyyy-mm-dd %H:%M:%S" where %H - Hour of the day, 24-hour clock (00..23), %M - Minute of the hour (00..59), %S - Second of the minute (00..60)
+   - `brand_id`: brand ID as a string
+   - `suppressed_list_ids`: array of list IDs in string format
+   - `suppressed_journey_ids`: array of journey IDs in string format
+   - `suppressed_segment_ids`: array of segment IDs in string format
+   - `email_preview_link`: (string)
+   - `decided_by`: allowed values: ('TopChoice' for Top Choices) or ('Opens' for Highest Open Rate) or ('Clicks' for Highest Click Rate) or ('Manual' for Manual Selection) or ('click_to_open' for Highest Click-to-Open Rate) or ('conversions' for Highest Conversion Rate)
+   - `lists`: array of list IDs in string format
+   - `ctags`: array of tags in string format
+   - `segments`: array of segments in string format
    
 ## Transactional Campaigns
 
@@ -127,32 +144,35 @@ The specific APIs contained are:
      - `language` ISO 639-1 language code
      - `add_ctags` array of campaign tags
 
- - `send_email(campaign_id, content_id = nil, content_name = nil, contentHtmlPart = nil, contentTextPart = nil,`
-              `sendAtHour = nil, sendAtMinute = nil, ignoreDnm = nil, contact_id = nil, recipientEmail = nil,`
-              `recipientfirst_name = nil, recipientlast_name = nil, recipientCustomFields = nil,`
-              `bccEmail = nil, fromName = nil, fromEmail = nil, subject = nil, replyTo = nil,`
-              `senderAddress = nil, tags = nil, ctags = nil)`
+ - `send_email(campaign_id,
+                 content: {},
+                 contact: {},
+                 send_time: {},
+                 ignore_dnm: nil,
+                 bcc: nil,
+                 from_name: nil,
+                 from_email: nil,
+                 subject: nil,
+                 reply_to: nil,
+                 address: nil,
+                 tags: {},
+                 add_ctags: [])`
      * Sends a transactional campaign email to a recipient. Sender's information will be automatically fetched from the transactional campaign, unless provided in the function arguments.
      - `campaign_id`: must be a campaign that already exists when you call `svc->get()`. If you don't have one, first call `svc->create()`.
-     - `content_id`: If provided, the transactional campaign's content will be replaced by this content.
-     - `content_name`: If `content_id` is nil, the transactional campaign's content name will be replaced by this name.
-     - `contentHtmlPart`: If `content_id` is nil, the transactional campaign's content HTML part will be replaced by this HTML part.
-     - `contentTextPart`: If `content_id` is nil, the transactional campaign's content Text part will be replaced by this Text part.
-     - `sendAtHour`: Must be 1-12. Otherwise the email will go out immediately. If the hour is less than the current hour, the email will go out the following day.
-     - `sendAtMinute`: Must be 0-60. Otherwise will be treated as 0. If the hour and minute combine to less than the current time, the email will go out the following day.
+     - `content`: hash with the following fields: `name`, `html_part`, `text_part`
      - `ignoreDnm`: If true, ignores the Do Not Mail list for the recipient contact.
-     - `contact_id`: contact ID of the recipient.
-     - `recipientEmail`: email address. Ignored unless `contact_id` is nil. Otherwise, it must be a well-formed email address according to `FILTER_VALIDATE_EMAIL`.
-     - `recipientfirst_name`: recipient's first name. Ignored unless `contact_id` is nil.
-     - `recipientlast_name`: recipient's last name. Ignored unless `contact_id` is nil.
-     - `recipientCustomFields`: custom fields for the recipient. Ignored unless `contact_id` is nil. Is a Dictionary where the item key is the name of the custom field, and the item value is the field value. All values must be non-nil scalars.
-     - `bccEmail`: BCC recipient. May only pass a single email address, empty string, or nil. If provided, it must be a well-formed email address according to `FILTER_VALIDATE_EMAIL`.
-     - `fromName`: sender's name. If `fromEmail` is set, it overrides the transactional campaign default sender name. Ignored otherwise.
-     - `fromEmail`: sender's email address. Overrides the transactional campaign default sender email.
+     - `contact`: hash defining the recipient with the following fields: `email`, `first_name`, `last_name`, `custom_field`
+       - `custom_field`: is a hash of the custom fields.
+     - `send_time`: hash with the following string fields: `hour` ("1" - "12") and `minute` ("00" - "59")
+       - If the hour is less than the current hour, the email will go out the following day.
+       - If the hour and minute combine to less than the current time, the email will go out the following day.
+     - `bcc`: BCC recipient. May only pass a single email address, empty string, or nil. If provided, it must be a well-formed email address.
+     - `from_name`: sender's name. If `from_email` is set, it overrides the transactional campaign default sender name. Ignored otherwise.
+     - `from_email`: sender's email address. Overrides the transactional campaign default sender email.
      - `subject`: subject line of email. Overrides the transactional campaign default subject.
-     - `replyTo`: reply-to address. Overrides the transactional campaign default reply-to.
-     - `senderAddress`: physical address of sender. Overrides the transactional campaign default sender address.
-     - `tags`: Dictionary where the item key is the name of the tag within the content, and the item value is the tag's replacement upon sending. All values must be non-nil scalars.
+     - `reply_to`: reply-to address. Overrides the transactional campaign default reply-to.
+     - `address`: physical address of sender. Overrides the transactional campaign default sender address.
+     - `tags`: hash where the field name is the name of the tag within the content, and the field value is the tag's replacement upon sending. All values must be non-nil scalars.
      - `ctags`: campaign tags. Must be a simple array of scalar values.
      
 ## Contacts
@@ -187,9 +207,9 @@ The specific APIs contained are:
    - `list_id`: ID of the list to which the contact is being retrieved
    - `contact_id`: contact id of contact to for which the contact is being retrieved
 
- - `create_or_update_for_list(list_id, email, first_name = nil, last_name = nil, phone = nil,`
-                              `fax = nil, uid = nil, custom_field = nil, add_tags = nil,`
-                              `remove_tags = nil, remove_from_dnm = true, subscribe = true)`
+ - `create_or_update_for_list(list_id, email, first_name: nil, last_name: nil, phone: nil,`
+                              `fax: nil, uid: nil, custom_field: nil, add_tags: nil,`
+                              `remove_tags: nil, remove_from_dnm: true, subscribe: true)`
      * Creates a contact within a list. Updates if previous contact is matched by email
      - `list_id`: ID of the list to which the contact being updated belongs
      - `contact_id`: ID of the contact being updated
@@ -205,8 +225,8 @@ The specific APIs contained are:
      - `remove_from_dnm`: set this true to subscribe contact to the list, and remove it from DNM)
      - `subscribe`: set this true to subscribe contact to the list; false otherwise
   
- - `update_for_list_and_contact(list_id, contact_id, email, first_name = nil, last_name = nil, phone = nil, fax = nil,`
-                                `uid = nil, custom_field = nil, add_tags = nil, remove_tags = nil, remove_from_dnm = true, subscribe = true)`
+ - `update_for_list_and_contact(list_id, contact_id, email, first_name: nil, last_name: nil, phone: nil, fax: nil,`
+                                `uid: nil, custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: true, subscribe: true)`
      * Creates a contact within a list. Updates if previous contact is matched by email.
      - `list_id`: ID of the list for which the contact is being created
      - `email`: email address for the contact to be created|updated
@@ -221,8 +241,8 @@ The specific APIs contained are:
      - `remove_from_dnm`: Set this true to subscribe contact to the list, and remove it from DNM.
      - `subscribe`: true to subscribe the contact to the list; false otherwise.
 
- - `create_or_update_contact(email, first_name = nil, last_name = nil, phone = nil, fax = nil, uid = nil,`
-														  `custom_field = nil, add_tags = nil, remove_tags = nil, remove_from_dnm = true, subscribe = true)`
+ - `create_or_update_contact(email, first_name: nil, last_name: nil, phone: nil, fax: nil, uid: nil,`
+														  `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: true, subscribe: true)`
      * Creates a contact without a list. Updates if already existing email is passed.
      - `contact_id`: ID of the contact
      - `email`: Email address for the contact to be created|updated
@@ -237,9 +257,9 @@ The specific APIs contained are:
      - `remove_from_dnm`: set this true to subscribe contact to the list, and remove it from DNM
 	 - `subscribe`: true to subscribe the contact to the list; false otherwise.
 
- - `create_or_update_for_list_and_workflows(email, first_name = nil, last_name = nil, phone = nil, fax = nil, uid = nil,`
-																	  `custom_field = nil, add_tags = nil, remove_tags = nil, remove_from_dnm = false, subscribe_list_ids = nil,`
-																	  `unsubscribe_list_ids = nil, unsubscribe_workflow_ids = nil, unsubscribe_campaign = nil)`
+ - `create_or_update_for_list_and_workflows(email, first_name: nil, last_name: nil, phone: nil, fax: nil, uid: nil,`
+																	  `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: false, subscribe_list_ids: nil,`
+																	  `unsubscribe_list_ids: nil, unsubscribe_workflow_ids: nil, unsubscribe_campaign: nil)`
      * Creates or updates Contact
         - Multiple lists can be subscribed, unsubscribed. 
         - Multiple workflows can be unsubscribed.
@@ -262,7 +282,7 @@ The specific APIs contained are:
      * Deletes specified contact from all lists
      - `email`: email address of the contact
 
- - `delete_from_lists(contact_id, list_ids = nil)`
+ - `delete_from_lists(contact_id, list_ids: nil)`
      * Deletes the specified contact from the specified lists
      - `contact_id`: id of the contact
      - `list_ids`: simple array of ids of the lists
@@ -276,7 +296,7 @@ The specific APIs contained are:
 	 - `list_id`: ID of the list for which the contact is being deleted
 	 - `contact_id`: contact id of the list for which the contact is being deleted
 
- - `unsubscribe_all(contact_field_value, contact_field_name = "email")`
+ - `unsubscribe_all(contact_field_value, contact_field_name: "email")`
      * Unsubscribes contact having the specified field name/value.
      - `contact_field_value`: the value of the field for the contact(s) being unsubscribed
      - `contact_field_name`: the name of the field being checked for the value. At present, the accepted field names are: 'email' or 'uid'
@@ -361,14 +381,14 @@ The specific APIs contained are:
                 `order_status,`
                 `original_order_id,`
                 `order_items,`
-                `custom_fields = nil,`
-                `add_tags = nil,`
-                `remove_tags = nil,`
-                `uid = nil,`
-                `list_ids = nil,`
-                `grand_total = nil,`
-                `campaign_id = nil,`
-                `coupon_code = nil)`
+                `custom_fields: nil,`
+                `add_tags: nil,`
+                `remove_tags: nil,`
+                `uid: nil,`
+                `list_ids: nil,`
+                `grand_total: nil,`
+                `campaign_id: nil,`
+                `coupon_code: nil)`
      * Creates an order
      - `require_unique`: true to validate that the order has a unique original_order_id for the given contact.
      - `contact_email`: email address of contact
@@ -397,8 +417,8 @@ The specific APIs contained are:
                                       `order_date_time,`
                                       `order_status,`
                                       `order_items,`
-                                      `campaign_id = nil,`
-                                      `coupon_code = nil)`
+                                      `campaign_id: nil,`
+                                      `coupon_code: nil)`
      * Updates an existing eCommerce order using unique original_order_id if the details are changed due to partial return or some other update.
      - `original_order_id`: matches the original_order_id field of the order
      - `order_date_time`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
@@ -411,8 +431,8 @@ The specific APIs contained are:
                               `order_date_time,`
                               `order_status,`
                               `order_items,`
-                              `campaign_id = nil,`
-                              `coupon_code = nil)`
+                              `campaign_id: nil,`
+                              `coupon_code: nil)`
      * Updates an existing eCommerce order using unique order_id if the details are changed due to partial return or some other update.
      - `order_id`: matches the Maropost order_id field of the order
      - `order_date_time`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
@@ -502,13 +522,13 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    - `id`: report ID
 
  - `get_opens(page,`
-             `fields = [],`
-             `from = nil,`
-             `to = nil,`
-             `unique = nil,`
-             `email = nil,`
-             `uid = nil,`
-             `per = nil)`
+             `fields: [],`
+             `from: nil,`
+             `to: nil,`
+             `unique: nil,`
+             `email: nil,`
+             `uid: nil,`
+             `per: nil)`
    * returns the list of open reports based on filters and fields provided
    - `page`: page # (>= 1). Up to 200 records returned per page.
    * `fields`: contact field names to retrieve
@@ -520,13 +540,13 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    * `per`: determines how many records per request to receive
 
  - `get_clicks(page,`
-              `fields = [],`
-              `from = nil,`
-              `to = nil,`
-              `unique = nil,`
-              `email = nil,`
-              `uid = nil,`
-              `per = nil)`
+              `fields: [],`
+              `from: nil,`
+              `to: nil,`
+              `unique: nil,`
+              `email: nil,`
+              `uid: nil,`
+              `per: nil)`
    * returns the list of click reports
    * `page`: page # (>= 1). Up to 200 records returned per page.
    * `fields`: plucks these contact fields if they exist
@@ -538,14 +558,14 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    * `per`: gets the specified number of records
 
  - `get_bounce(page,`
-              `fields = [],`
-              `from = nil,`
-              `to = nil,`
-              `unique = nil,`
-              `email = nil,`
-              `uid = nil,`
-              `type = nil,`
-              `per = nil)`
+              `fields: [],`
+              `from: nil,`
+              `to: nil,`
+              `unique: nil,`
+              `email: nil,`
+              `uid: nil,`
+              `type: nil,`
+              `per: nil)`
    * returns the list of bounce reports
    * `page`: page # (>= 1). Up to 200 records returned per page.
    * `fields`: plucks these contact fields if they exist
@@ -558,13 +578,13 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    * `per`: gets the specified number of records
 
  - ` get_unsubscribes(page,`
-                     `fields = [],`
-                     `from = nil,`
-                     `to = nil,`
-                     `unique = nil,`
-                     `email = nil,`
-                     `uid = nil,`
-                     `per = nil)`
+                     `fields: [],`
+                     `from: nil,`
+                     `to: nil,`
+                     `unique: nil,`
+                     `email: nil,`
+                     `uid: nil,`
+                     `per: nil)`
    * returns the list of Unsubscribes with provided filter constraints
    * `page`: page # (>= 1). Up to 200 records returned per page.
    * `fields`: plucks these contact fields if they exist
@@ -576,13 +596,13 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    * `per` gets the specified number of records
 
  - `get_complaints(page,`
-                  `fields = nil,`
-                  `from = nil,`
-                  `to = nil,`
-                  `unique = nil,`
-                  `email = nil,`
-                  `uid = nil,`
-                  `per = nil)`
+                  `fields: nil,`
+                  `from: nil,`
+                  `to: nil,`
+                  `unique: nil,`
+                  `email: nil,`
+                  `uid: nil,`
+                  `per: nil)`
    * returns the list of complaints filtered by provided params
    * `page`: page # (>= 1). Up to 200 records returned per page.
    * `fields`: plucks these contact fields if they exist
@@ -595,9 +615,9 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
 
  - ` get_ab_reports(name,`
                   `page,`
-                  `from = nil,`
-                  `to = nil,`
-                  `per = nil)`
+                  `from: nil,`
+                  `to: nil,`
+                  `per: nil)`
    * returns the list of Ab Reports
    * `name`: to get ab_reports with mentioned name
    * `page`: page # (>= 1). Up to 200 records returned per page.
