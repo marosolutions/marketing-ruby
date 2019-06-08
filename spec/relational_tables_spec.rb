@@ -1,4 +1,4 @@
-RSpec.describe MaropostApi::RelationalTables do
+RSpec.describe MaropostApi::RelationalTableRows do
   before(:each) do
     @test_data = {
       :account_id => 1000,
@@ -10,7 +10,7 @@ RSpec.describe MaropostApi::RelationalTables do
   
   describe "--- CREATE ----" do    
     it "creates a single valid record" do
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       test_email = "test_email" << Time.new.to_i.to_s << '@maropost.com'
       create_record = r_table.create({:email => test_email})
       
@@ -31,7 +31,7 @@ RSpec.describe MaropostApi::RelationalTables do
         'param as only string',
         123123123
       ]
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       invalid_emails.each do |invalid_email|
         expect{
           r_table.create(invalid_email)
@@ -43,7 +43,7 @@ RSpec.describe MaropostApi::RelationalTables do
       r1 = {:email => "abc_#{Time.now.to_i.to_s}@maropost.com"}
       r2 = {:email => "def_#{Time.now.to_i.to_s}@maropost.com"}
       r3 = {:email => "ghi_#{Time.now.to_i.to_s}@maropost.com"}
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       
       create_record = r_table.create(r1, r2, r3)
       # record creation expectations
@@ -58,7 +58,7 @@ RSpec.describe MaropostApi::RelationalTables do
     end  
     
     it "shows a specified record from the relational table" do
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       records = r_table.get
       records.data['records'].each do |rec|
         record = r_table.show('ID', rec["ID"])
@@ -76,7 +76,7 @@ RSpec.describe MaropostApi::RelationalTables do
   
   describe "---- GET ----" do
     it "gets list of records for the provided relation table" do
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       records = r_table.get
       
       expect(records).to be_kind_of OperationResult
@@ -91,7 +91,7 @@ RSpec.describe MaropostApi::RelationalTables do
   
   describe "---- PUT ----" do
     it "updates records in the Relational table" do
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       r1 = {:email => "create1#{Time.now.to_i.to_s}@maropost.com", :ID => 100}
       r2 = {:email => "create2#{Time.now.to_i.to_s}@maropost.com", :ID => 101}
       r3 = {:email => "create3#{Time.now.to_i.to_s}@maropost.com", :ID => 102}
@@ -112,7 +112,7 @@ RSpec.describe MaropostApi::RelationalTables do
     end
     
     it "creates or updates a record in the table" do
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       r1 = {:email => "create_1#{Time.now.to_i.to_s}@maropost.com", :ID => 111}
       r2 = {:email => "create_2#{Time.now.to_i.to_s}@maropost.com", :ID => 222}
       r3 = {:email => "update_1#{Time.now.to_i.to_s}@maropost.com", :ID => 111}
@@ -134,7 +134,7 @@ RSpec.describe MaropostApi::RelationalTables do
   
   describe "---- DELETE ----" do
     it "deletes the given record of the relational table" do
-      r_table = MaropostApi::RelationalTables.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
+      r_table = MaropostApi::RelationalTableRows.new(@test_data[:account_id], :table_name => @test_data[:default_table_name])
       all_records = r_table.get
       
       all_records.data['records'].each do |rec|

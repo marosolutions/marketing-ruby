@@ -1,5 +1,5 @@
 module MaropostApi 
-  class RelationalTables
+  class RelationalTableRows
     
     attr_accessor :table_name
     

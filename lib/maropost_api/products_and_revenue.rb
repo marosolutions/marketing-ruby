@@ -47,11 +47,12 @@ module MaropostApi
         order[:order_items].push(item.to_hash)
       end
       # required order fields to check for
-      [:order_date, :order_status, :original_order_id, :order_items].each do |order_field|
+      [:order_date, :order_status, :original_order_id].each do |order_field|
         raise ArgumentError.new "order[:#{order_field}] is required!" if order.has_key?(order_field) == false
       end
 
       params = order
+      params[:order_items] = order_items
       params[:contact] = contact
       params[:uid] = uid
       params[:list_ids] = list_ids

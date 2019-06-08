@@ -157,8 +157,8 @@ The specific APIs contained are:
                  address: nil,
                  tags: {},
                  add_ctags: [])`
-     * Sends a transactional campaign email to a recipient. Sender's information will be automatically fetched from the transactional campaign, unless provided in the function arguments.
-     - `campaign_id`: must be a campaign that already exists when you call `svc->get()`. If you don't have one, first call `svc->create()`.
+     * Sends a transactional campaign email to a recipient contact. Sender's information will be automatically fetched from the transactional campaign, unless provided in the function arguments.
+     - `campaign_id`: must be a campaign that already exists when you call `get()`. If you don't have one, first call `create(...)`.
      - `content`: hash with the following fields: `name`, `html_part`, `text_part`
      - `ignoreDnm`: If true, ignores the Do Not Mail list for the recipient contact.
      - `contact`: hash defining the recipient with the following fields: `email`, `first_name`, `last_name`, `custom_field`
@@ -242,7 +242,7 @@ The specific APIs contained are:
      - `subscribe`: true to subscribe the contact to the list; false otherwise.
 
  - `create_or_update_contact(email, first_name: nil, last_name: nil, phone: nil, fax: nil, uid: nil,`
-														  `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: true, subscribe: true)`
+                          `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: true, subscribe: true)`
      * Creates a contact without a list. Updates if already existing email is passed.
      - `contact_id`: ID of the contact
      - `email`: Email address for the contact to be created|updated
@@ -258,8 +258,8 @@ The specific APIs contained are:
 	 - `subscribe`: true to subscribe the contact to the list; false otherwise.
 
  - `create_or_update_for_list_and_workflows(email, first_name: nil, last_name: nil, phone: nil, fax: nil, uid: nil,`
-																	  `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: false, subscribe_list_ids: nil,`
-																	  `unsubscribe_list_ids: nil, unsubscribe_workflow_ids: nil, unsubscribe_campaign: nil)`
+                                          `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: false, subscribe_list_ids: nil,`
+                                          `unsubscribe_list_ids: nil, unsubscribe_workflow_ids: nil, unsubscribe_campaign: nil)`
      * Creates or updates Contact
         - Multiple lists can be subscribed, unsubscribed. 
         - Multiple workflows can be unsubscribed.
@@ -373,40 +373,25 @@ The specific APIs contained are:
  - `get_order_for_original_order_id(original_order_id)`
      * Gets the specified order
 
- - `create_order(require_unique,`
-                `contact_email,`
-                `contact_first_name,`
-                `contact_last_name,`
-                `order_date_time,`
-                `order_status,`
-                `original_order_id,`
-                `order_items,`
-                `custom_fields: nil,`
-                `add_tags: nil,`
-                `remove_tags: nil,`
-                `uid: nil,`
-                `list_ids: nil,`
-                `grand_total: nil,`
-                `campaign_id: nil,`
-                `coupon_code: nil)`
+ - `create_order(require_unique, contact: {}, order: {}, order_items: [], add_tags: [], `
+                   `remove_tags: [], uid: nil, list_ids: nil, grand_total: nil, `
+                   `campaign_id: nil, coupon_code: nil)`
      * Creates an order
      - `require_unique`: true to validate that the order has a unique original_order_id for the given contact.
-     - `contact_email`: email address of contact
-     - `contact_first_name`: first name of contact
-     - `contact_last_name`: last name of contact
-     - `order_date_time`: uses the format: "YYYY-MM-DDTHH:MM:SS-05:00"
-     - `order_status`: status of order
-     - `original_order_id`: sets the original_order_id field
-     - `order_items`: must contain at least one order_itemInput. When creating an order_itemInput, do not manually set the properties. Just use the constructor, itself having the parameters:
-	     - itemId
-		 - price: price of the order_item
-		 - quantity: quantity purchased
-		 - description: description of the product
-		 - adcode: adcode of the order_item
-		 - category: category of the product
-     - `custom_fields` Dictionary Item key represents the field name and the Dictionary Item value is the field value
-     - `add_tags` tags to add
-     - `remove_tags` tags to remove
+     - `contact`: hash containing the following fields: `email`, `first_name`, `last_name`
+     - `order`: hash containing the following fields:
+         - `order_date`: uses the format: "YYYY-MM-DDTHH:MM:SS-05:00"
+         - `order_status`: status of order
+         - `original_order_id`: sets the original_order_id field
+     - `order_items`: must contain at least one `OrderItem`. When creating an item, do not manually set the properties. Just use the constructor, itself having the parameters:
+	     - `item_id`
+		 - `price`: price of the order_item
+		 - `quantity`: quantity purchased
+		 - `description`: description of the product
+		 - `adcode`: adcode of the order_item
+		 - `category`: category of the product
+     - `add_tags` array of strings
+     - `remove_tags` array of strings
      - `uid`: unique id
      - `list_ids` CSV list of IDs (e.g, "12,13")
      - `grand_total`: grand total
@@ -462,16 +447,16 @@ The specific APIs contained are:
 ## Relational Table Rows
 
 ### Instantiation:
-Unlike the other services, the constructor for this requires a fourth
-parameter: `tableName`. So for example:
+Unlike the other services, the constructor for this requires a third
+parameter: `table_name`. So for example:
 
     MaropostApi::RelationalTableRows.new(my_account_id, my_auth_token, "someTableName")
 
-`tableName` sets which relational table the service's operations should act against.
-To switch tables, you do not need to re-instantiate the service. Simply update the `TableName` property of the instance:
+`table_name` sets which relational table the service's operations should act against.
+To switch tables, you do not need to re-instantiate the service. Simply update the `table_name` property of the instance:
 
     rows = MaropostApi::RelationalTableRows.new(myId, myToken, "table1");
-	rows.TableName = "table2";
+	rows.table_name = "table2";
 
 ### Available functions:
 
@@ -574,7 +559,7 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    * `unique`: if true, gets unique records
    * `email`: gets Bounces for specific email
    * `uid`: gets Bounces for provided uid
-   * 'type`: if provided, should be either "soft", or "hard".
+   * `type`: if provided, should be either "soft", or "hard".
    * `per`: gets the specified number of records
 
  - ` get_unsubscribes(page,`
