@@ -6,11 +6,11 @@ require "maropost_api/version"
 Gem::Specification.new do |spec|
   spec.name          = "maropost-api"
   spec.version       = MaropostApi::VERSION
-  spec.authors       = ["Ashish Acharya"]
-  spec.email         = ["aacharya@ap-logic.com"]
+  spec.authors       = ["Ashish Acharya", "David Lamb"]
+  spec.email         = ["aacharya@aplogic.com", "dlamb@aplogic.com"]
 
   spec.summary       = "A consumer gem for Maropost.com api"
-  spec.description   = "test Description"
+  spec.description   = "Maropost API"
   spec.homepage      = "https://api.maropost.com/api"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
