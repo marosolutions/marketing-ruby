@@ -15,19 +15,20 @@ service, execute:
 
     reports = MaropostApi::Reports.new(account_id, auth_token)
     result = reports.Get(1);
-    if result.success {
+    if (result.success) {
         myReports = result.data;
     }
 
-The result object contains two fields:
+The result object contains three fields:
 
 - `success` (bool)
 - `errors` (object)
+- `data` (Hash|Mixed)
 
 If `success` is `false`, then `errors` will have details about the reason for
 failure. If `errors` is not `nil`, then `success` will always be `false`.
 
-The object might also contain one property, `data` (dynamic), which contains whatever
+The object also contains accessor, `data`, which contains whatever
 data the operation itself provides. Some operations, such as `delete()`
 operations, might not provide any data.
 
@@ -39,7 +40,7 @@ The specific APIs contained are:
 - [Transactional Campaigns](#transactional-campaigns)
 - [Contacts](#contacts)
 - [Journeys](#journeys)
-- [Product and Revenue](#product-and-revenue)
+- [Products and Revenue](#products-and-revenue)
 - [Relational Table Rows](#relational-table-rows)
 - [Reports](#reports)
 
@@ -187,7 +188,7 @@ The specific APIs contained are:
 
  - `get_for_email(email)`
    * Gets the contact according to email address 
-   - `email`: email address of the contact
+   * `email`: email address of the contact
 
  - `get_opens(contact_id, page)`
    * Gets the list of opens for the specified contact
@@ -242,52 +243,43 @@ The specific APIs contained are:
      - `remove_tags`: tags to remove from the contact. Simple array of tag names (strings).
      - `remove_from_dnm`: Set this true to subscribe contact to the list, and remove it from DNM.
      - `subscribe`: true to subscribe the contact to the list; false otherwise.
-
- - `create_or_update_contact(email, first_name: nil, last_name: nil, phone: nil, fax: nil, uid: nil,`
-                          `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: true, subscribe: true)`
-     * Creates a contact without a list. Updates if already existing email is passed.
-     - `contact_id`: ID of the contact
-     - `email`: Email address for the contact to be created|updated
-     - `first_name`: first name of Contact
-     - `last_name`: last Name of Contact
-     - `phone`: phone number of Contact
-     - `fax`: fax number of Contact
-     - `uid`: UID for the contact
-     - `custom_field`: custom fields passed as associative array. Keys represent the field names while values represent the values
-     - `add_tags`: tags to add to the contact. Simple array of tag names (strings).
-     - `remove_tags`: tags to remove from the contact. Simple array of tag names (strings).
-     - `remove_from_dnm`: set this true to subscribe contact to the list, and remove it from DNM
-	 - `subscribe`: true to subscribe the contact to the list; false otherwise.
-
- - `create_or_update_for_list_and_workflows(email, first_name: nil, last_name: nil, phone: nil, fax: nil, uid: nil,`
-                                          `custom_field: nil, add_tags: nil, remove_tags: nil, remove_from_dnm: false, subscribe_list_ids: nil,`
-                                          `unsubscribe_list_ids: nil, unsubscribe_workflow_ids: nil, unsubscribe_campaign: nil)`
+ 
+ - `create_or_update_for_lists_and_workflows( 
+        email,
+        first_name,
+        last_name,
+        phone,
+        fax,
+        uid = nil,
+        custom_field = {},
+        add_tags = [],
+        remove_tags = [],
+        remove_from_dnm = true,
+        **options
+    )`
      * Creates or updates Contact
         - Multiple lists can be subscribed, unsubscribed. 
         - Multiple workflows can be unsubscribed.
-     - `email`: email address for the contact to be created|updated
-     - `first_name`: first name of Contact
-     - `last_name`: last name of Contact
-     - `phone`: phone number of Contact
-     - `fax`: fax number of Contact
-     - `uid`: UID for the Contact
-     - `custom_field`: custom fields passed as associative array. Keys represent the field names while values represent the values
-     - `add_tags`: tags to add to the contact. Simple array of tag names (strings)
-     - `remove_tags`: tags to remove from the contact. Simple array of tag names (strings)
-     - `remove_from_dnm`: set this true to subscribe contact to the list, and remove it from DNM
-     - `subscribe_list_ids`: simple array of IDs of lists to subscribe the contact to
-     - `unsubscribe_list_ids`: simple array of IDs of Lists to unsubscribe the contact from
-     - `unsubscribe_workflow_ids`: simple array of list of IDs of workflows to unsubscribe the contact from
-     - `unsubscribe_campaign`: campaign_id to unsubscribe the contact from
+     * `email`: [String] must be an email
+     * `first_name`: [String] Contact First Name
+     * `last_name`: [String] Contact Last Name
+     * `phone`: [String] Contact's phone number
+     * `fax`: [String] Contacts' fax number
+     * `uid`: [String] Unique identifier
+     * `custom_field`: [Hash] list of custom_fields addable for the new contact
+     * `add_tags`: [Array] list of tags to be added to the contact
+     * `remove_tags`: [Array] list of tags to be removed from the contact
+     * `remove_from_dnm`: [Boolean] decides whether to remove contact from dnm or not
+     * `options`: [Hash] Key value pairs containing other different properties for the new contact
 
  - `delete_from_all_lists(email)`
      * Deletes specified contact from all lists
-     - `email`: email address of the contact
+     * `email`: email address of the contact
 
- - `delete_from_lists(contact_id, list_ids: nil)`
+ - `delete_from_lists(contact_id, lists_to_delete_from)`
      * Deletes the specified contact from the specified lists
-     - `contact_id`: id of the contact
-     - `list_ids`: simple array of ids of the lists
+     * `contact_id`: id of the contact
+     * `lists_to_delete_from`: simple array of ids of the lists
 
  - `delete_contact_for_uid(uid)`
      * Deletes contact having the specified UID
@@ -300,8 +292,9 @@ The specific APIs contained are:
 
  - `unsubscribe_all(contact_field_value, contact_field_name: "email")`
      * Unsubscribes contact having the specified field name/value.
-     - `contact_field_value`: the value of the field for the contact(s) being unsubscribed
-     - `contact_field_name`: the name of the field being checked for the value. At present, the accepted field names are: 'email' or 'uid'
+     * `contact_field_value`: the value of the field for the contact(s) being unsubscribed
+     * `contact_field_name`: the name of the field being checked for the value. At present, the 
+     accepted field names are: 'email' or 'uid'
 
 ## Journeys
 
@@ -325,44 +318,53 @@ The specific APIs contained are:
 	 - `journey_id`: get contacts filtered with journey_id
      - `page` : page # (>= 1). Up to 200 records returned per page.
 
- - `stop_all(contact_id, recipientEmail, uid, page)`
+ - `stop_all(contact_id: nil, uid: nil, email_recipient: nil)`
      * Stops all journeys, filtered for the matching parameters
-     - `contact_id`: this filter ignored unless greater than 0
-     - `recipientEmail`: this filter ignored if nil
-     - `uid`: this filter ignored if nil
-	 - `page`: page # (>= 1). Up to 200 record returned per page.
+     * `contact_id:`: this filter ignored unless greater than 0
+     * `uid:`: this filter ignored if null
+     * `email_recipient:`: this filter ignored if null
 
- - `pause_journey_for_contact(journey_id, contact_id)`
+ - `pause_for_contact(journey_id, contact_id)`
      * Pause the specified journey for the specified contact
 	 - `journey_id`: journey to pause
 	 - `contact_id`: pause journey for specified contact id
 
- - `pause_journey_for_uid(journey_id, uid)`
+ - `pause_for_uid(journey_id, uid)`
      * Pause the specified journey for the contact having the specified UID
 	 - `journey_id`: journey to pause
 	 - `uid`: pause journey for specified uid
 
- - `reset_journey_for_contact(journey_id, contact_id)`
-     * Reset the specified journey for the specified active/paused contact. Resetting a contact to the beginning of the journeys will result in sending of the same journey campaigns as originally sent.
+ - `reset_for_contact(journey_id, contact_id)`
+     * Reset the specified journey for the specified active/paused contact. 
+     Resetting a contact to the beginning of the journeys will result in 
+     sending of the same journey campaigns as originally sent.
 	 - `journey_id`: journey to reset
 	 - `contact_id`: reset journey for specified contact id
 
- - `reset_journey_for_uid(journey_id, uid)`
-     * Restarts a journey for a paused contact having the specified UID. Adds a new contact in journey. Retriggers the journey for a contact who has finished its journey once. (To retrigger, *make sure* that "Retrigger Journey" option is enabled.)
+ - `reset_for_uid(journey_id, uid)`
+     * Reset the specified journey for the active/paused contact having the 
+     specified UID. Resetting a contact to the beginning of the journeys 
+     will result in sending of the same journey campaigns as originally sent.
 	 - `journey_id`: journey to reset
 	 - `uid`: uid of contact to reset journey
 
- - `start_journey_for_contact(journey_id, contact_id)`
-	* Starts a journey for contact having specified journey_id
+ - `start_for_contact(journey_id, contact_id)`
+     * Restarts a journey for a paused contact. Adds a new contact in 
+     journey. Retriggers the journey for a contact who has finished its 
+     journey once. (To retrigger, *make sure* that "Retrigger Journey" option 
+     is enabled.)
 	- `journey_id`: journey to start
 	- `contact_id`: contact id of contact to start journey
 
- - `start_journey_for_uid(journey_id, uid)`
-	* Starts a journey for contact having specified uid and journey_id
+ - `start_for_uid(journey_id, uid)`
+     * Restarts a journey for a paused contact having the specified UID. 
+     Adds a new contact in journey. Retriggers the journey for a contact 
+     who has finished its journey once. (To retrigger, *make sure* that 
+     "Retrigger Journey" option is enabled.)
 	- 'journey_id': journey to start
 	- 'uid': uid of contact to start journey
 
-## Product and Revenue
+## Products and Revenue
 
 ### Instantiation:
 
@@ -400,34 +402,28 @@ The specific APIs contained are:
      - `campaign_id`: campaign id
      - `coupon_code`: coupon code
 
- - `update_order_for_original_order_id(original_order_id,`
-                                      `order_date_time,`
-                                      `order_status,`
-                                      `order_items,`
-                                      `campaign_id: nil,`
-                                      `coupon_code: nil)`
-     * Updates an existing eCommerce order using unique original_order_id if the details are changed due to partial return or some other update.
-     - `original_order_id`: matches the original_order_id field of the order
-     - `order_date_time`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
-     - `order_status`: order status
-     - `order_items`: must contain at least one order_item.
-     - `campaign_id`: campaign id
-     - `coupon_code`: coupon code
+ - `update_order_for_original_order_id(original_order_id, order: {})`
+     * Updates an existing eCommerce order using unique original_order_id if the details are changed due to partial
+      return or some other update.
+     * `original_order_id:`: [String] Orginal Order Id of the Order
+     * `order:`: [Hash] Contains the following fields:
+         - `order_date_time`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
+         - `order_status`: order status
+         - `order_items`: must contain at least one order_item.
+         - `campaign_id`: campaign id
+         - `coupon_code`: coupon code
 
- - `update_order_for_order_id(order_id,`
-                              `order_date_time,`
-                              `order_status,`
-                              `order_items,`
-                              `campaign_id: nil,`
-                              `coupon_code: nil)`
-     * Updates an existing eCommerce order using unique order_id if the details are changed due to partial return or some other update.
-     - `order_id`: matches the Maropost order_id field of the order
-     - `order_date_time`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
-     - `order_status`: order status
-     - `order_items`: must contain at least one order_item.
-     - `campaign_id`: campaign id
-     - `coupon_code`: coupon code
-    
+ - `update_order_for_order_id(order_id, order: {})`
+     * Updates an existing eCommerce order using unique order_id if the details are changed due to partial return or
+     * some other update.
+     * `original_order_id:`: [String] Original Order Id of the Order
+     * `order:`: [Hash] Contains the following fields:
+         - `order_date`: uses the format: YYYY-MM-DDTHH:MM:SS-05:00
+         - `order_status`: order status
+         - `order_items`: must contain at least one order_item.
+         - `campaign_id`: campaign id
+         - `coupon_code`: coupon code
+
  - `delete_for_original_order_id(original_order_id)`
      * Deletes the complete eCommerce order if the order is cancelled or returned
      - `original_order_id` matches the original_order_id field of the order
@@ -437,14 +433,16 @@ The specific APIs contained are:
      - `id`: Maropost order_id
 
  - `delete_products_for_original_order_id(original_order_id, product_ids)`
-     * Deletes the specified product(s) from a complete eCommerce order if the product(s) is cancelled or returned
-     - `original_order_id`: matches the original_order_id field of the order
-     - `product_ids`: the product(s) to delete from the order
+     * Deletes the specified product(s) from a complete eCommerce order if 
+     the product(s) is cancelled or returned
+     * `original_order_id`: matches the original_order_id field of the order
+     * `product_ids`: the product(s) to delete from the order
 
- - `delete_products_for_order_id(id, product_ids)`
-     * Deletes the specified product(s) from a complete eCommerce order if the product(s) is cancelled or returned
-     - `id`: Maropost order_id
-     - `product_ids`: the product(s) to delete from the order
+ - `delete_products_for_order_id(order_id, product_ids)`
+     * Deletes the specified product(s) from a complete eCommerce order if 
+     the product(s) is cancelled or returned
+     * `order_ids`: Maropost order_id
+     * `product_ids`: the product(s) to delete from the order
 
 ## Relational Table Rows
 
@@ -472,21 +470,21 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
 
  - `create(key_value_col, *key_value_cols)`
      * Adds a record to the Relational Table
-     * `key_value_col`: object hash containing the fields of the
-     record to be created, each item consisting of two fields.
-       - NOTE: One of the fields must represent the unique identifier.
+     * `key_value_col`: object hash representing the unique identifier of the record to add.
+         * hash key represents the column name and the hash value is the column value.  
+     * `*key_value_cols`: other hashes representing other columns to add
 
  - `update(key_value_col, *key_value_cols)`
      * Updates a record in the Relational Table.
-     * `key_value_col`: object hash containing the fields of the
-     record to be created, each item consisting of two fields.
-       - NOTE: One of the KeyValues must represent the unique identifier.
+     * `key_value_col`: object hash representing the unique identifier of the record to add.
+         * hash key represents the column name and the hash value is the column value.  
+     * `*key_value_cols`: other hashes representing other columns to add
 
  - `upsert(key_value_col, *key_value_cols)`
      * Creates or updates a record in the Relational Table.
-     * `key_value_col`: object hash containing the fields of the
-     record to be created, each item consisting of two fields.
-       - NOTE: One of the KeyValues must represent the unique identifier.
+     * `key_value_col`: object hash representing the unique identifier of the record to add.
+         * hash key represents the column name and the hash value is the column value.  
+     * `*key_value_cols`: other hashes representing other columns to add
 
  - `delete(unique_field_name, value)`
      * Deletes the given record of the Relational Table
@@ -612,6 +610,6 @@ To switch tables, you do not need to re-instantiate the service. Simply update t
    * `to`: end of date range filter
    * `per`: gets the mentioned number of reports
 
- - `get_journey(page)`
+ - `get_journeys(page)`
    * returns the list of all Journeys
    * `page`: page # (>= 1). Up to 200 records returned per page.
