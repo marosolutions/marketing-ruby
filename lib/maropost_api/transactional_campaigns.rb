@@ -56,7 +56,9 @@ module MaropostApi
         raise ArgumentError.new('bcc must be a valid email address') until bcc.nil? or bcc.match? email_regex
         raise ArgumentError.new('from_email must be a valid email address') until from_email.nil? or from_email.match? email_regex
         raise ArgumentError.new('reply_to must be a valid email address') until reply_to.nil? or reply_to.match? email_regex
-        raise ArgumentError.new('add_ctags must be a valid Array of string') until add_ctags.is_a? Array and add_ctags.all?{|t| t.is_a? String }
+        raise ArgumentError.new('add_ctags must be a valid Array of string') until address_ctags.is_a? Array and add_ctags.all?{|t| t.is_a? String }
+        raise ArgumentError.new('send_time must have two keys viz. :hour, :minute') until send_time.has_key?(:hour) and send_time.has_key?(:minute)
+        raise ArgumentError.new('send_time[:hour] must be between 1-12 and send_time[:minute] must be between 0-59') until (1..12).to_a.include?(send_time[:hour]) and (0..59).to_a.include?(send_time[:minute])
         
         params = {}
         method(__method__).parameters.each{|p| params[p[1]] = eval(p[1].to_s)}
