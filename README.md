@@ -94,26 +94,28 @@ The specific APIs contained are:
 ### Available Methods:
  - `create_ab_test(name, from_email, address, language, campaign_groups_attributes,`
                   `commit, sendAt, brand_id: nil, suppressed_list_ids: [],`
-                  `suppressed_journey_ids: [], suppressed_segment_ids: [], emailPreviewLink: nil,`
+                  `suppressed_journey_ids: [], suppressed_segment_ids: [], email_preview_link: nil,`
                   `decided_by: nil, lists: [], ctags: [], segments: [])`
    * Creates an Ab Test campaign
    - `name`: name of the new campaign
    - `from_email`: default sender email address for campaign emails
    - `address`: default physical address included on campaign emails
    - `language`: ISO 639-1 language code (e.g., "en"). 2 characters
-   - `campaign_groups_attributes`: array of attributes. Each attribute is itself a hash with the following properties (all strings):
+   - `campaign_groups_attributes`: array of attributes. Each attribute is itself a hash with the following fields (all strings):
      - `name`: name of the group
      - `content_id`: content ID
      - `subject`: subject line of emails
      - `from_name`: "from name" on emails
      - `percentage`: percentage of emails that should be send with these settings 
+     - `preheader`:
+     - `sendAt`: DateTime string having the format `YYYY-MM-DD HH:mm:ss`
    - `commit`: allowed values: 'Save as Draft' or 'Send Test' or 'Schedule'
    - `sendAt`: should be in "yyyy-mm-dd %H:%M:%S" where %H - Hour of the day, 24-hour clock (00..23), %M - Minute of the hour (00..59), %S - Second of the minute (00..60)
    - `brand_id`: brand ID as a string
    - `suppressed_list_ids`: array of list IDs in string format
    - `suppressed_journey_ids`: array of journey IDs in string format
    - `suppressed_segment_ids`: array of segment IDs in string format
-   - `email_preview_link`: (string)
+   - `email_preview_link`: "0" for false. "1" for true.
    - `decided_by`: allowed values: ('TopChoice' for Top Choices) or ('Opens' for Highest Open Rate) or ('Clicks' for Highest Click Rate) or ('Manual' for Manual Selection) or ('click_to_open' for Highest Click-to-Open Rate) or ('conversions' for Highest Conversion Rate)
    - `lists`: array of list IDs in string format
    - `ctags`: array of tags in string format
@@ -132,17 +134,17 @@ The specific APIs contained are:
  - `create(name, subject, preheader, from_name, from_email, reply_to,`
            `content_id, email_preview_link, address, language, add_ctags)`
      * Creates a Transactional Campaign
-     - `name` campaign name
-     - `subject` campaign subject
-     - `preheader` campaign preheader
-     - `from_name` sender name in the email
-     - `from_email` sender email address
-     - `reply_to` reply-to email address
-     - `content_id`
-     - `email_preview_link`
-     - `address` physical address
-     - `language` ISO 639-1 language code
-     - `add_ctags` array of campaign tags
+     - `name`: campaign name
+     - `subject`: campaign subject
+     - `preheader`: campaign preheader
+     - `from_name`: sender name in the email
+     - `from_email`: sender email address
+     - `reply_to`: reply-to email address
+     - `content_id`:
+     - `email_preview_link`: boolean. `true` to send email; `false` otherwise.
+     - `address`: physical address
+     - `language`: ISO 639-1 language code (e.g., "en"). 2 characters
+     - `add_ctags`: array of campaign tags
 
  - `send_email(campaign_id,
                  content: {},
@@ -160,7 +162,7 @@ The specific APIs contained are:
      * Sends a transactional campaign email to a recipient contact. Sender's information will be automatically fetched from the transactional campaign, unless provided in the function arguments.
      - `campaign_id`: must be a campaign that already exists when you call `get()`. If you don't have one, first call `create(...)`.
      - `content`: hash with the following fields: `name`, `html_part`, `text_part`
-     - `ignoreDnm`: If true, ignores the Do Not Mail list for the recipient contact.
+     - `ignore_dnm`: If true, ignores the Do Not Mail list for the recipient contact.
      - `contact`: hash defining the recipient with the following fields: `email`, `first_name`, `last_name`, `custom_field`
        - `custom_field`: is a hash of the custom fields.
      - `send_time`: hash with the following string fields: `hour` ("1" - "12") and `minute` ("00" - "59")
